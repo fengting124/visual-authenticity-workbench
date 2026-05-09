@@ -1,9 +1,10 @@
-import type { EvidenceItem, ExpertResult, SemanticStep } from './types';
+import type { EvidenceItem, ExpertMeterConfig, ExpertResult, SemanticStep } from './types';
 
 export const semanticSteps: SemanticStep[] = [
   {
     id: 'global',
     name: '全局语义理解',
+    lockedUntilPhase: 'semantic-chain',
     status: 'complete',
     input: '原始图像、样本来源、推断生成提示词',
     result: '场景主体、空间结构和光照关系被归纳为统一语义上下文。',
@@ -12,6 +13,7 @@ export const semanticSteps: SemanticStep[] = [
   {
     id: 'local',
     name: '局部区域解析',
+    lockedUntilPhase: 'expert-spatial',
     status: 'complete',
     input: '自动标注输出的候选区域 R-01、R-02、R-03',
     result: '反射、纹理和边界线索集中在局部过渡区域。',
@@ -20,6 +22,7 @@ export const semanticSteps: SemanticStep[] = [
   {
     id: 'logic',
     name: '逻辑一致性',
+    lockedUntilPhase: 'expert-semantic',
     status: 'review',
     input: '空间关系、光照方向、物体边界和候选证据',
     result: '部分区域的反射方向与可见几何关系存在冲突。',
@@ -28,12 +31,22 @@ export const semanticSteps: SemanticStep[] = [
   {
     id: 'explain',
     name: '解释输出',
+    lockedUntilPhase: 'complete',
     status: 'complete',
     input: '语义链结果、专家组分数、候选证据置信度',
     result: '样本进入高风险复核队列，建议生成结构化报告。',
     explanation: '解释链保留从候选证据到最终判断的可追踪路径。',
   },
 ];
+
+export const expertMeterConfigs: ExpertMeterConfig[] = [
+  { phaseId: 'expert-spatial', label: '空间专家', icon: 'SP', riskScore: 82, findings: ['透视异常', '几何畸变'] },
+  { phaseId: 'expert-frequency', label: '频域专家', icon: 'FQ', riskScore: 76, findings: ['高频噪声', '频谱异常'] },
+  { phaseId: 'expert-style', label: '风格专家', icon: 'ST', riskScore: 68, findings: ['材质偏移', '风格断裂'] },
+  { phaseId: 'expert-semantic', label: '语义专家', icon: 'SM', riskScore: 89, findings: ['逻辑矛盾', '语义断裂'] },
+];
+
+export const fusionEvidenceChips = ['边界异常', '透视畸变', '纹理断裂', '语义矛盾'];
 
 export const expertResults: ExpertResult[] = [
   {

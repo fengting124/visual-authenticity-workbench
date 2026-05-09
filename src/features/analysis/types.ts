@@ -5,6 +5,7 @@ export type SemanticStep = {
   input: string;
   result: string;
   explanation: string;
+  lockedUntilPhase?: string;
 };
 
 export type ExpertResult = {
@@ -21,4 +22,12 @@ export type ExpertResult = {
 export type EvidenceItem = {
   label: string;
   value: string;
+};
+
+export type ExpertMeterConfig = {
+  phaseId: string;
+  label: string;
+  icon: string;
+  riskScore: number;
+  findings: string[];
 };

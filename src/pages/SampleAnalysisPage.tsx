@@ -1,33 +1,35 @@
 import { ChangeEvent, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { InfoIcon } from 'lucide-react';
-import { expertResults, semanticSteps } from '../features/analysis/data';
 import { CandidateEvidencePanel } from '../features/analysis/components/CandidateEvidencePanel';
-import { EvidenceFusionPanel } from '../features/analysis/components/EvidenceFusionPanel';
-import { ExpertContributionChart } from '../features/analysis/components/ExpertContributionChart';
-import { ExpertGroupPanel } from '../features/analysis/components/ExpertGroupPanel';
-import { SampleViewer } from '../features/analysis/components/SampleViewer';
+import { DetectionLogStream } from '../features/analysis/components/DetectionLogStream';
+import { ExpertMeterPanel } from '../features/analysis/components/ExpertMeterPanel';
+import { FusionVerdictPanel } from '../features/analysis/components/FusionVerdictPanel';
+import { ImageScanCanvas, type ScanRegion } from '../features/analysis/components/ImageScanCanvas';
 import { SemanticChainPanel } from '../features/analysis/components/SemanticChainPanel';
+import { semanticSteps } from '../features/analysis/data';
+import { PHASE_CONFIGS, type PhaseId, useDetectionPhases } from '../features/analysis/hooks/useDetectionPhases';
 import { activeSample, samples } from '../features/samples/data';
 import type { FakeRegion } from '../features/samples/types';
 import { PageShell } from '../layouts/PageShell';
-import { PipelineStatusBar } from '../shared/components/PipelineStatusBar';
 import { SectionCard } from '../shared/components/SectionCard';
 import { loadAnnotationFromSession, readFileAsDataUrl, readLocalAsset, saveLocalAsset } from '../shared/utils/localSample';
-
-const detectionStages = [
-  { title: '图像输入解析', output: '建立图像检测任务上下文' },
-  { title: '候选证据读取', output: '载入自动标注候选证据' },
-  { title: '语义链推理', output: '输出语义链中间解释' },
-  { title: '专家组检测', output: '输出多专家风险分数' },
-  { title: '证据融合', output: '形成最终判断和报告入口' },
-];
 
 function isFakeRegionList(value: unknown[] | null): value is FakeRegion[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'object' && item !== null && 'id' in item && 'clue' in item);
 }
 
+function phaseStepId(activePhase: PhaseId, selectedEvidence?: FakeRegion) {
+  if (activePhase === 'semantic-chain') return 'global';
+  if (activePhase === 'expert-spatial' || activePhase === 'expert-frequency') return 'local';
+  if (activePhase === 'expert-semantic' || activePhase === 'fusion') return 'logic';
+  if (activePhase === 'complete') return 'explain';
+  return selectedEvidence?.semanticStepId ?? 'global';
+}
+
 export function SampleAnalysisPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sampleId = searchParams.get('sampleId') ?? activeSample.id;
   const selectedSample = samples.find((sample) => sample.id === sampleId && sample.type === 'image') ?? activeSample;
@@ -35,7 +37,20 @@ export function SampleAnalysisPage() {
   const candidateEvidence = isFakeRegionList(storedEvidence) ? storedEvidence : selectedSample.regions;
   const analysisSample = { ...selectedSample, regions: candidateEvidence };
 
+  const {
+    activePhase,
+    isRunning,
+    isComplete,
+    visibleLogLines,
+    startDetection,
+    resetDetection,
+    isPhaseComplete,
+    isPhaseActive,
+    progress,
+  } = useDetectionPhases();
+
   const [selectedEvidenceId, setSelectedEvidenceId] = useState(candidateEvidence[0]?.id ?? '');
+  const [selectedExpert, setSelectedExpert] = useState<PhaseId | null>(null);
   const [localImage, setLocalImage] = useState(() => {
     const stored = readLocalAsset('image');
     return {
@@ -43,15 +58,29 @@ export function SampleAnalysisPage() {
       name: stored.name ?? 'fake.jpg',
     };
   });
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [complete, setComplete] = useState(false);
 
   const selectedEvidence = useMemo(
     () => candidateEvidence.find((region) => region.id === selectedEvidenceId) ?? candidateEvidence[0],
     [candidateEvidence, selectedEvidenceId],
   );
-  const activeExpertIds = selectedEvidence?.expertIds ?? ['spatial', 'semantic'];
-  const activeStepId = selectedEvidence?.semanticStepId ?? 'logic';
+
+  const scanRegions: ScanRegion[] = useMemo(
+    () =>
+      candidateEvidence.map((region) => ({
+        id: region.id,
+        x: region.x,
+        y: region.y,
+        width: region.width,
+        height: region.height,
+        type: region.type,
+        riskScore: region.confidence,
+      })),
+    [candidateEvidence],
+  );
+
+  const activeStepId = phaseStepId(activePhase, selectedEvidence);
+  const activePhaseLabel = PHASE_CONFIGS.find((phase) => phase.id === activePhase)?.label ?? '';
+  const resolvedImageSrc = localImage.dataUrl ?? selectedSample.assetSrc ?? '/demo-assets/fake.jpg';
 
   function handleImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -59,84 +88,128 @@ export function SampleAnalysisPage() {
     readFileAsDataUrl(file, (dataUrl) => {
       saveLocalAsset('image', dataUrl, file.name);
       setLocalImage({ dataUrl, name: file.name });
+      resetDetection();
     });
   }
 
-  function startDetection() {
-    setComplete(false);
-    setActiveIndex(0);
-    detectionStages.forEach((_, index) => {
-      window.setTimeout(() => {
-        setActiveIndex(index);
-        if (index === detectionStages.length - 1) {
-          window.setTimeout(() => setComplete(true), 450);
-        }
-      }, index * 650);
-    });
+  function handleStart() {
+    setSelectedExpert(null);
+    startDetection();
+  }
+
+  function handleReset() {
+    setSelectedExpert(null);
+    resetDetection();
+  }
+
+  function handleGenerateReport() {
+    navigate(`/report?sampleId=${selectedSample.id}`);
   }
 
   return (
-    <PageShell eyebrow="检测工作台" title="候选证据进入可解释检测" description="">
-      <PipelineStatusBar steps={['解析', '读取', '推理', '专家', '融合']} currentStep={activeIndex} complete={complete} />
-      {complete && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded text-xs text-forensic-stone bg-graphite-800/50 border border-forensic-gold/10/50 mt-2">
-          <InfoIcon size={12} />
-          演示模式 · 检测结果由预置证据驱动，不代表真实模型输出
-        </div>
-      )}
-
-      <SectionCard title="图像检测输入" eyebrow={selectedSample.id} className="mt-5">
-        <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <label className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
-            <p className="text-sm font-semibold">选择待检测图像</p>
-            <p className="mt-2 text-xs text-forensic-stone">{localImage.name}</p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              className="mt-4 block w-full text-xs text-forensic-stone file:mr-3 file:rounded file:border-0 file:bg-forensic-gold/10 file:px-3 file:py-2 file:text-forensic-gold"
-            />
+    <PageShell eyebrow="检测工作台" title="图像证据可解释检测" description="">
+      <div className="mb-4 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-forensic-text">{selectedSample.id}</p>
+            <p className="mt-1 text-xs text-forensic-stone">输入文件：{localImage.name}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cursor-pointer rounded-md border border-forensic-gold/[0.08] bg-graphite-800 px-3 py-2 text-xs text-forensic-stone transition hover:border-forensic-gold/30">
+              导入图像
+              <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
+            </label>
             <button
               type="button"
-              onClick={startDetection}
-              className="mt-4 w-full rounded-md border border-forensic-gold/40 bg-forensic-gold/10 px-4 py-2 text-sm font-medium text-forensic-gold"
+              onClick={handleStart}
+              disabled={isRunning}
+              className="rounded-md border border-forensic-gold/40 bg-forensic-gold/10 px-4 py-2 text-xs font-medium text-forensic-gold disabled:cursor-not-allowed disabled:opacity-50"
             >
-              开始检测
+              {isRunning ? '检测运行中' : '开始检测'}
             </button>
-          </label>
-          <div className="grid grid-cols-5 gap-3">
-            {detectionStages.map((stage) => (
-              <div key={stage.title} className="rounded-lg border border-forensic-gold/[0.08] bg-graphite-850 p-3">
-                <p className="text-sm font-semibold">{stage.title}</p>
-                <p className="mt-2 text-xs text-forensic-stone">{stage.output}</p>
-              </div>
-            ))}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="rounded-md border border-forensic-gold/[0.08] bg-graphite-800 px-4 py-2 text-xs font-medium text-forensic-stone"
+            >
+              重置
+            </button>
           </div>
         </div>
-      </SectionCard>
 
-      <div className="grid gap-5 lg:grid-cols-[330px_1fr_430px]">
-        <SectionCard title="样本与候选证据" eyebrow="标注输出">
-          <SampleViewer sample={analysisSample} imageSrc={localImage.dataUrl} />
-          <div className="mt-4">
-            <p className="mb-3 text-xs uppercase tracking-[0.14em] text-forensic-stone">来自自动标注的候选证据</p>
-            <CandidateEvidencePanel sample={analysisSample} selectedId={selectedEvidenceId} onSelect={setSelectedEvidenceId} />
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs text-forensic-stone">
+              {isRunning ? `正在执行：${activePhaseLabel}` : isComplete ? '检测完成' : '就绪'}
+            </span>
+            <span className="font-mono text-xs tabular-nums text-forensic-gold">{progress}%</span>
           </div>
-        </SectionCard>
-        <SectionCard title="语义链理解" eyebrow="检测过程">
-          <SemanticChainPanel steps={semanticSteps} compact activeStepId={activeStepId} onSelectStep={() => undefined} />
-        </SectionCard>
-        <SectionCard title="专家组检测" eyebrow="多证据专家">
-          <ExpertGroupPanel experts={expertResults} activeExpertIds={activeExpertIds} onSelectExpert={() => undefined} />
-          <div className="mt-4 rounded-md border border-forensic-gold/[0.08] bg-graphite-950 p-3">
-            <ExpertContributionChart experts={expertResults} />
+          <div className="h-1 overflow-hidden rounded-full bg-graphite-800">
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, #B88A44, #D2A64A)',
+                boxShadow: isRunning ? '0 0 8px rgba(184,138,68,0.5)' : 'none',
+              }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
-        </SectionCard>
+        </div>
+
+        {isComplete && (
+          <div className="mt-3 flex items-center gap-2 rounded border border-forensic-gold/10 bg-graphite-800/50 px-3 py-1.5 text-xs text-forensic-stone">
+            <InfoIcon size={12} />
+            演示模式 · 检测结果由预置证据驱动，不代表真实模型输出
+          </div>
+        )}
       </div>
 
-      <SectionCard title="证据融合摘要" eyebrow="决策层" className="mt-5">
-        <EvidenceFusionPanel />
-      </SectionCard>
+      <div className="grid gap-5 lg:grid-cols-[360px_minmax(0,1fr)_360px]">
+        <SectionCard title="样本扫描" eyebrow="输入与候选证据">
+          <div className="space-y-4">
+            <ImageScanCanvas
+              imageSrc={resolvedImageSrc}
+              regions={scanRegions}
+              activePhase={activePhase}
+              selectedRegionId={selectedEvidenceId}
+              onRegionClick={setSelectedEvidenceId}
+            />
+            <DetectionLogStream lines={visibleLogLines} isRunning={isRunning} />
+            <div>
+              <p className="mb-3 text-xs uppercase tracking-[0.14em] text-forensic-stone">候选证据</p>
+              <CandidateEvidencePanel sample={analysisSample} selectedId={selectedEvidenceId} onSelect={setSelectedEvidenceId} />
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="语义链推理" eyebrow="逐步解锁">
+          <SemanticChainPanel
+            steps={semanticSteps}
+            compact
+            activePhase={activePhase}
+            isPhaseComplete={isPhaseComplete}
+            activeStepId={activeStepId}
+            onSelectStep={() => undefined}
+          />
+        </SectionCard>
+
+        <SectionCard title="专家组检测" eyebrow="多证据计量">
+          <ExpertMeterPanel
+            activePhase={activePhase}
+            isPhaseComplete={isPhaseComplete}
+            isPhaseActive={isPhaseActive}
+            selectedExpert={selectedExpert}
+            onExpertClick={setSelectedExpert}
+          />
+          <FusionVerdictPanel
+            isVisible={isComplete}
+            riskScore={selectedSample.riskScore}
+            onGenerateReport={handleGenerateReport}
+            onViewReport={handleGenerateReport}
+          />
+        </SectionCard>
+      </div>
     </PageShell>
   );
 }
