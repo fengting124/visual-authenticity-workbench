@@ -21,11 +21,11 @@ export function SegmentPanel({ segment, running, reviewed, onRun, onReview }: Se
         </h3>
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded border border-graphite-800 bg-graphite-850 p-3">
+        <div className="rounded border border-forensic-gold/[0.08] bg-graphite-850 p-3">
           <p className="text-xs text-forensic-stone">开始时间</p>
           <p className="mt-1">{segment.start}</p>
         </div>
-        <div className="rounded border border-graphite-800 bg-graphite-850 p-3">
+        <div className="rounded border border-forensic-gold/[0.08] bg-graphite-850 p-3">
           <p className="text-xs text-forensic-stone">结束时间</p>
           <p className="mt-1">{segment.end}</p>
         </div>

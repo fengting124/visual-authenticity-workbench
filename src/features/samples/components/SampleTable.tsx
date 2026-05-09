@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import type { EvidenceSample } from '../types';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import {
@@ -19,7 +20,7 @@ type SampleTableProps = {
 
 export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-graphite-800">
+    <div className="overflow-hidden rounded-lg border border-forensic-gold/[0.08]">
       <table className="w-full border-collapse text-sm">
         <thead className="bg-graphite-850 text-xs uppercase tracking-[0.12em] text-forensic-stone">
           <tr>
@@ -36,10 +37,13 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
           </tr>
         </thead>
         <tbody>
-          {samples.map((sample) => (
-            <tr
+          {samples.map((sample, index) => (
+            <motion.tr
               key={sample.id}
-              className={`border-t border-graphite-800 bg-graphite-900/80 ${
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03, duration: 0.2 }}
+              className={`border-t border-forensic-gold/[0.08] bg-graphite-900/80 ${
                 selectedId === sample.id ? 'outline outline-1 outline-forensic-gold/40' : ''
               }`}
             >
@@ -83,7 +87,7 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
                   </Link>
                 </div>
               </td>
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>

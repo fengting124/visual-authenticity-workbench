@@ -9,7 +9,7 @@ type SampleStatusPanelProps = {
 
 export function SampleStatusPanel({ sample }: SampleStatusPanelProps) {
   return (
-    <div className="space-y-3 rounded-md border border-graphite-800 bg-graphite-850 p-4">
+    <div className="space-y-3 rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold">{sample.id}</p>

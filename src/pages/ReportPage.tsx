@@ -18,13 +18,25 @@ export function ReportPage() {
   }
 
   return (
-    <PageShell eyebrow="证据报告" title="结构化证据报告" description="">
+    <div
+      className="min-h-full"
+      style={{
+        backgroundImage: `
+          linear-gradient(rgba(184,138,68,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(184,138,68,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '24px 24px',
+        backgroundColor: '#111315',
+      }}
+    >
+      <PageShell eyebrow="证据报告" title="结构化证据报告" description="">
       {notice && (
-        <div className="fixed right-6 top-16 z-50 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-300 shadow-lg backdrop-blur">
+        <div className="fixed right-6 top-16 z-50 rounded-lg border border-forensic-gold/30 bg-forensic-gold/10 px-4 py-3 text-sm text-forensic-gold shadow-lg backdrop-blur">
           报告已发送至打印队列
         </div>
       )}
-      <ReportPreview sections={reportSections} onExport={exportReport} />
-    </PageShell>
+        <ReportPreview sections={reportSections} onExport={exportReport} />
+      </PageShell>
+    </div>
   );
 }

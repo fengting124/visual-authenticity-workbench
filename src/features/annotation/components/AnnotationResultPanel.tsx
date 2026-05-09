@@ -29,7 +29,7 @@ export function AnnotationResultPanel({
         <h3 className="mt-1 text-lg font-semibold">{sample.id}</h3>
       </div>
 
-      <div className="rounded-md border border-graphite-800 bg-graphite-850 p-4">
+      <div className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
         <p className="text-xs text-forensic-stone">生成提示词或推断提示词</p>
         <p className="mt-2 text-sm leading-6">{sample.prompt}</p>
       </div>
@@ -70,7 +70,7 @@ export function AnnotationResultPanel({
         <button
           type="button"
           onClick={onSendToAnalysis}
-          className="rounded-md border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-center text-sm font-medium text-cyan-300"
+          className="rounded-md border border-forensic-gold/30 bg-forensic-gold/10 px-4 py-2 text-center text-sm font-medium text-forensic-gold"
         >
           发送到分析
         </button>

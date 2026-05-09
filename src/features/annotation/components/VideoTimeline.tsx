@@ -15,7 +15,7 @@ const positions = [
 
 export function VideoTimeline({ segments, selectedId, onSelect }: VideoTimelineProps) {
   return (
-    <div className="rounded-md border border-graphite-800 bg-[#101213] p-4">
+    <div className="rounded-md border border-forensic-gold/[0.08] bg-graphite-950 p-4">
       <div className="mb-3 flex justify-between text-xs text-forensic-stone">
         <span>00:00</span>
         <span>00:10</span>

@@ -18,7 +18,7 @@ export function AnnotationCenterPage() {
         type: 'pie',
         radius: ['72%', '88%'],
         silent: true,
-        label: { show: true, position: 'center', formatter: '72%', color: '#00c4ff', fontSize: 34, fontWeight: 700 },
+        label: { show: true, position: 'center', formatter: '72%', color: '#B88A44', fontSize: 34, fontWeight: 700 },
         data: [
           { value: 72, name: '完成' },
           { value: 28, name: '剩余' },
@@ -29,11 +29,11 @@ export function AnnotationCenterPage() {
 
   const evidenceTypeOption = {
     ...darkChartBase,
-    xAxis: { type: 'value', axisLabel: { color: '#7a8aa0' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,.08)' } } },
+    xAxis: { type: 'value', axisLabel: { color: '#A8A29A' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,.08)' } } },
     yAxis: {
       type: 'category',
       data: ['可疑区域', '视频片段', '关键帧', '提示词线索'],
-      axisLabel: { color: '#7a8aa0' },
+      axisLabel: { color: '#A8A29A' },
     },
     series: [{ type: 'bar', data: [7, 5, 13, 10], barWidth: 12 }],
     grid: { ...darkChartBase.grid, left: 80 },
@@ -45,22 +45,22 @@ export function AnnotationCenterPage() {
         <button
           type="button"
           onClick={() => navigate('/annotation/image')}
-          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/[0.04] transition hover:-translate-y-0.5 hover:border-cyan-500/50 hover:bg-cyan-500/5"
+          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 transition hover:-translate-y-0.5 hover:border-forensic-gold/50 hover:bg-forensic-gold/5"
         >
-          <ImageIcon className="h-12 w-12 text-cyan-400" />
+          <ImageIcon className="h-12 w-12 text-forensic-gold" />
           <p className="text-2xl font-semibold">图像标注</p>
-          <p className="text-sm text-[#7a8aa0]">自动发现可疑区域</p>
-          <span className="rounded-lg bg-cyan-400 px-5 py-2 text-sm font-semibold text-[#06101a]">进入</span>
+          <p className="text-sm text-forensic-stone">自动发现可疑区域</p>
+          <span className="rounded-lg bg-forensic-gold px-5 py-2 text-sm font-semibold text-graphite-950">进入</span>
         </button>
         <button
           type="button"
           onClick={() => navigate('/annotation/video')}
-          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-white/10 bg-white/[0.04] transition hover:-translate-y-0.5 hover:border-cyan-500/50 hover:bg-cyan-500/5"
+          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 transition hover:-translate-y-0.5 hover:border-forensic-gold/50 hover:bg-forensic-gold/5"
         >
-          <Video className="h-12 w-12 text-cyan-400" />
+          <Video className="h-12 w-12 text-forensic-gold" />
           <p className="text-2xl font-semibold">视频标注</p>
-          <p className="text-sm text-[#7a8aa0]">定位可疑片段</p>
-          <span className="rounded-lg bg-cyan-400 px-5 py-2 text-sm font-semibold text-[#06101a]">进入</span>
+          <p className="text-sm text-forensic-stone">定位可疑片段</p>
+          <span className="rounded-lg bg-forensic-gold px-5 py-2 text-sm font-semibold text-graphite-950">进入</span>
         </button>
       </div>
 
@@ -76,11 +76,11 @@ export function AnnotationCenterPage() {
       <SectionCard title="最近标注任务" className="mt-5">
         <div className="grid gap-3 lg:grid-cols-3">
           {samples.slice(0, 6).map((sample) => (
-            <div key={sample.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+            <div key={sample.id} className="rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">{sample.id}</p>
-                  <p className="mt-1 text-xs text-[#7a8aa0]">{TYPE_LABEL[sample.type]}</p>
+                  <p className="mt-1 text-xs text-forensic-stone">{TYPE_LABEL[sample.type]}</p>
                 </div>
                 <StatusBadge tone={toneForStatus(sample.annotationStatus)}>
                   {statusLabel(sample.annotationStatus)}

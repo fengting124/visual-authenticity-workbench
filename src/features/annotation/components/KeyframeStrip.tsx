@@ -15,10 +15,10 @@ export function KeyframeStrip({ frames, selectedFrame, onSelect }: KeyframeStrip
           key={frame}
           onClick={() => onSelect?.(frame)}
           className={`aspect-video rounded border bg-graphite-850 p-2 text-left ${
-            selectedFrame === frame ? 'border-forensic-gold' : 'border-graphite-800'
+            selectedFrame === frame ? 'border-forensic-gold' : 'border-forensic-gold/[0.08]'
           }`}
         >
-          <div className="h-full rounded-sm bg-[#111315] [background-image:linear-gradient(45deg,rgba(111,143,114,.24)_1px,transparent_1px)] [background-size:12px_12px]" />
+          <div className="h-full rounded-sm bg-graphite-950 [background-image:linear-gradient(45deg,rgba(111,143,114,.24)_1px,transparent_1px)] [background-size:12px_12px]" />
           <p className="mt-1 text-[10px] text-forensic-stone">{frame}</p>
         </button>
       ))}

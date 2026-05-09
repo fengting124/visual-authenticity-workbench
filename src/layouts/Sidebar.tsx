@@ -1,4 +1,5 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Cpu,
   Database,
@@ -12,69 +13,88 @@ import {
 import { cn } from '../shared/utils/cn';
 
 type NavigationItem =
-  | { divider: true }
+  | { divider: true; id: string }
   | { icon: typeof LayoutDashboard; label: string; path: string; sub?: boolean };
 
 const navItems: NavigationItem[] = [
   { icon: LayoutDashboard, label: '总览', path: '/' },
   { icon: Database, label: '样本库', path: '/samples' },
-  { divider: true },
+  { divider: true, id: 'sample-divider' },
   { icon: Tag, label: '标注中心', path: '/annotation' },
   { icon: ImageIcon, label: '图像标注', path: '/annotation/image', sub: true },
   { icon: Video, label: '视频标注', path: '/annotation/video', sub: true },
-  { divider: true },
+  { divider: true, id: 'annotation-divider' },
   { icon: Cpu, label: '检测中心', path: '/analysis' },
   { icon: FlaskConical, label: '检测工作台', path: '/analysis/sample', sub: true },
-  { divider: true },
+  { divider: true, id: 'analysis-divider' },
   { icon: FileText, label: '证据报告', path: '/report' },
 ];
+
+const navVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -8 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.2 } },
+};
 
 export function Sidebar() {
   const location = useLocation();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col border-r border-white/10 bg-[#0d1421]">
-      <div className="border-b border-white/10 px-5 py-5">
-        <p className="text-xs uppercase tracking-[0.22em] text-[#00c4ff]">Evidence</p>
-        <h1 className="mt-2 text-lg font-semibold leading-tight text-[#e8edf5]">视觉证据工作台</h1>
+    <aside className="fixed inset-y-0 left-0 z-20 flex w-[220px] flex-col border-r border-forensic-gold/[0.08] bg-graphite-900">
+      <div className="border-b border-forensic-gold/[0.08] px-5 py-5">
+        <p className="text-xs uppercase tracking-[0.22em] text-forensic-gold">Evidence</p>
+        <h1 className="mt-2 text-lg font-semibold leading-tight text-forensic-text">视觉证据工作台</h1>
       </div>
 
-      <nav className="flex-1 space-y-1 p-3">
-        {navItems.map((item, index) => {
-          if ('divider' in item) {
-            return <div key={`divider-${index}`} className="my-3 h-px bg-white/10" />;
-          }
+      <AnimatePresence>
+        <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
+          {navItems.map((item) => {
+            if ('divider' in item) {
+              return <div key={item.id} className="my-3 h-px bg-forensic-gold/10" />;
+            }
 
-          const Icon = item.icon;
-          const isActive = item.path === '/' ? location.pathname === '/' : location.pathname === item.path;
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
 
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={cn(
-                'relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
-                item.sub ? 'ml-4 text-[13px]' : undefined,
-                isActive
-                  ? 'bg-[#00c4ff]/10 text-[#00c4ff]'
-                  : 'text-[#7a8aa0] hover:bg-white/[0.05] hover:text-[#e8edf5]',
-              )}
-            >
-              {isActive && <span className="absolute left-0 h-5 w-0.5 rounded bg-[#00c4ff]" />}
-              <Icon className="h-4 w-4" />
-              <span>{item.label}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
+            return (
+              <motion.div key={item.path} variants={itemVariants}>
+                <Link
+                  to={item.path}
+                  className={cn(
+                    'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
+                    item.sub ? 'ml-4 text-[13px]' : undefined,
+                    isActive
+                      ? 'bg-forensic-gold/[0.08] text-forensic-gold'
+                      : 'text-forensic-stone hover:bg-forensic-gold/[0.06] hover:text-forensic-text',
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active-indicator"
+                      className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-forensic-gold"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.nav>
+      </AnimatePresence>
 
-      <div className="border-t border-white/10 p-4 text-sm">
-        <p className="flex items-center gap-2 text-[#3ecf8e]">
-          <span className="h-2 w-2 rounded-full bg-[#3ecf8e]" />
+      <div className="border-t border-forensic-gold/[0.08] p-4 text-sm">
+        <p className="flex items-center gap-2 text-forensic-olive">
+          <span className="h-2 w-2 rounded-full bg-forensic-olive" />
           系统就绪
         </p>
-        <p className="mt-2 text-[#7a8aa0]">
-          <span className="font-semibold text-[#00c4ff]">12</span> 待处理
+        <p className="mt-2 text-forensic-stone">
+          <span className="font-semibold text-forensic-gold tabular-nums">12</span> 待处理
         </p>
       </div>
     </aside>

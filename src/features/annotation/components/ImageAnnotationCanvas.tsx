@@ -18,8 +18,8 @@ export function ImageAnnotationCanvas({
   const resolvedImageSrc = imageSrc ?? sample.assetSrc;
 
   return (
-    <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-white/10 bg-[#0d1421]">
-      <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(135deg,rgba(0,196,255,.12)_1px,transparent_1px)] [background-size:18px_18px]" />
+    <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-graphite-900">
+      <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(135deg,rgba(184,138,68,.12)_1px,transparent_1px)] [background-size:18px_18px]" />
       {resolvedImageSrc ? (
         <img src={resolvedImageSrc} alt="导入样本" className="h-full w-full object-contain opacity-90" />
       ) : (

@@ -17,7 +17,7 @@ export function SemanticStepCard({ step, index, active, onSelect }: SemanticStep
       onClick={() => onSelect?.(step.id)}
       whileHover={{ borderColor: '#B88A44' }}
       className={`w-full rounded-md border p-4 text-left ${
-        active ? 'border-forensic-warning bg-forensic-warning/10' : 'border-graphite-800 bg-graphite-850'
+        active ? 'border-forensic-warning bg-forensic-warning/10' : 'border-forensic-gold/[0.08] bg-graphite-850'
       }`}
     >
       <div className="mb-3 flex items-center justify-between gap-3">

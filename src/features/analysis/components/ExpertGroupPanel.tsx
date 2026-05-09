@@ -43,7 +43,7 @@ export function ExpertGroupPanel({
   return (
     <div className="space-y-4">
       {showGraph && (
-        <div className="h-64 rounded-md border border-graphite-800 bg-[#101213]">
+        <div className="h-64 rounded-md border border-forensic-gold/[0.08] bg-graphite-950">
           <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}>
             <Background color="#2D3338" gap={18} />
           </ReactFlow>

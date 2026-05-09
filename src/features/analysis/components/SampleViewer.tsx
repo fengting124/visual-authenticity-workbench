@@ -19,7 +19,7 @@ export function SampleViewer({ sample, imageSrc }: SampleViewerProps) {
       {sample.type === 'video' ? (
         <VideoPlayer src={sample.videoSrc} />
       ) : resolvedImageSrc ? (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
+        <div className="overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-black/20">
           <img src={resolvedImageSrc} alt="检测样本" className="h-56 w-full object-contain" />
         </div>
       ) : (
@@ -28,22 +28,22 @@ export function SampleViewer({ sample, imageSrc }: SampleViewerProps) {
 
       {sample.type === 'video' && (
         <div>
-          <p className="mb-2 text-xs uppercase tracking-[0.14em] text-[#7a8aa0]">关键帧</p>
+          <p className="mb-2 text-xs uppercase tracking-[0.14em] text-forensic-stone">关键帧</p>
           <KeyframeStrip frames={keyframes} />
         </div>
       )}
 
-      <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm">
+      <div className="space-y-2 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4 text-sm">
         <div className="flex justify-between gap-4">
-          <span className="text-[#7a8aa0]">样本来源</span>
+          <span className="text-forensic-stone">样本来源</span>
           <span>{SOURCE_LABEL[sample.source] ?? sample.source}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-[#7a8aa0]">类别</span>
+          <span className="text-forensic-stone">类别</span>
           <span>{sample.category}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-[#7a8aa0]">生成器</span>
+          <span className="text-forensic-stone">生成器</span>
           <span>{sample.generator ?? '未知'}</span>
         </div>
         <StatusBadge tone={toneForRisk(sample.riskLevel)}>{riskLabel(sample.riskLevel)}</StatusBadge>

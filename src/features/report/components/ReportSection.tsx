@@ -6,7 +6,7 @@ type ReportSectionProps = {
 
 export function ReportSection({ section }: ReportSectionProps) {
   return (
-    <section className="border-t border-graphite-800 py-5">
+    <section className="border-t border-forensic-gold/[0.08] py-5">
       <h3 className="mb-4 text-base font-semibold text-forensic-text">{section.title}</h3>
       <div className="grid gap-3">
         {section.rows.map((row) => (

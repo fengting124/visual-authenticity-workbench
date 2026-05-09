@@ -29,7 +29,7 @@ export function ProcessPipeline({ stages, activeIndex, complete }: ProcessPipeli
                 ? 'border-forensic-gold/50 bg-forensic-gold/10'
                 : done
                   ? 'border-forensic-olive/40 bg-forensic-olive/10'
-                  : 'border-graphite-800 bg-graphite-850'
+                  : 'border-forensic-gold/[0.08] bg-graphite-850'
             }`}
           >
             <div className="flex items-start gap-3">

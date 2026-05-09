@@ -19,7 +19,7 @@ export function ScoreBar({ label, value, tone = 'gold' }: ScoreBarProps) {
     <div>
       <div className="mb-2 flex items-center justify-between text-xs text-forensic-stone">
         <span>{label}</span>
-        <span>{formatPercent(value)}</span>
+        <span className="tabular-nums">{formatPercent(value)}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-graphite-800">
         <div className={cn('h-full rounded-full', toneClass[tone])} style={{ width: `${value}%` }} />

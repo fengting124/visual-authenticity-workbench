@@ -20,7 +20,7 @@ export function RegionClueList({ regions, selectedId, onSelect }: RegionClueList
           className={`rounded-md border p-4 text-left transition-colors ${
             selectedId === region.id
               ? 'border-forensic-warning bg-forensic-warning/10'
-              : 'border-graphite-800 bg-graphite-850 hover:border-forensic-gold/35'
+              : 'border-forensic-gold/[0.08] bg-graphite-850 hover:border-forensic-gold/35'
           }`}
         >
           <div className="mb-3 flex items-start justify-between gap-3">

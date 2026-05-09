@@ -16,9 +16,14 @@ export function SectionCard({ title, eyebrow, action, children, className }: Sec
     <motion.section
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{
+        borderColor: 'rgba(184,138,68,0.25)',
+        backgroundColor: 'rgba(32,36,40,0.92)',
+        y: -1,
+      }}
       transition={{ duration: 0.24 }}
       className={cn(
-        'rounded-xl border border-white/10 bg-white/[0.04] p-5 shadow-workstation backdrop-blur-xl',
+        'rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-5 shadow-workstation backdrop-blur-xl',
         className,
       )}
     >

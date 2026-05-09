@@ -79,7 +79,7 @@ export function SampleAnalysisPage() {
     <PageShell eyebrow="检测工作台" title="候选证据进入可解释检测" description="">
       <PipelineStatusBar steps={['解析', '读取', '推理', '专家', '融合']} currentStep={activeIndex} complete={complete} />
       {complete && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded text-xs text-slate-400 bg-slate-800/50 border border-slate-700/50 mt-2">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded text-xs text-forensic-stone bg-graphite-800/50 border border-forensic-gold/10/50 mt-2">
           <InfoIcon size={12} />
           演示模式 · 检测结果由预置证据驱动，不代表真实模型输出
         </div>
@@ -87,7 +87,7 @@ export function SampleAnalysisPage() {
 
       <SectionCard title="图像检测输入" eyebrow={selectedSample.id} className="mt-5">
         <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <label className="rounded-md border border-graphite-800 bg-graphite-850 p-4">
+          <label className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
             <p className="text-sm font-semibold">选择待检测图像</p>
             <p className="mt-2 text-xs text-forensic-stone">{localImage.name}</p>
             <input
@@ -106,9 +106,9 @@ export function SampleAnalysisPage() {
           </label>
           <div className="grid grid-cols-5 gap-3">
             {detectionStages.map((stage) => (
-              <div key={stage.title} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+              <div key={stage.title} className="rounded-lg border border-forensic-gold/[0.08] bg-graphite-850 p-3">
                 <p className="text-sm font-semibold">{stage.title}</p>
-                <p className="mt-2 text-xs text-[#7a8aa0]">{stage.output}</p>
+                <p className="mt-2 text-xs text-forensic-stone">{stage.output}</p>
               </div>
             ))}
           </div>
@@ -128,7 +128,7 @@ export function SampleAnalysisPage() {
         </SectionCard>
         <SectionCard title="专家组检测" eyebrow="多证据专家">
           <ExpertGroupPanel experts={expertResults} activeExpertIds={activeExpertIds} onSelectExpert={() => undefined} />
-          <div className="mt-4 rounded-md border border-graphite-800 bg-[#101213] p-3">
+          <div className="mt-4 rounded-md border border-forensic-gold/[0.08] bg-graphite-950 p-3">
             <ExpertContributionChart experts={expertResults} />
           </div>
         </SectionCard>

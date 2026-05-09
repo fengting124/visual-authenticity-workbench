@@ -20,7 +20,7 @@ export function CandidateEvidencePanel({ sample, selectedId, onSelect }: Candida
           className={`w-full rounded-md border p-3 text-left ${
             selectedId === candidate.id
               ? 'border-forensic-warning bg-forensic-warning/10'
-              : 'border-graphite-800 bg-graphite-850'
+              : 'border-forensic-gold/[0.08] bg-graphite-850'
           }`}
         >
           <div className="flex items-start justify-between gap-3">

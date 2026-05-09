@@ -16,7 +16,7 @@ export function EvidenceFusionPanel() {
     <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
       <div className="grid flex-1 grid-cols-4 gap-3">
         {evidenceSummary.map((item) => (
-          <div key={item.label} className="rounded-md border border-graphite-800 bg-graphite-850 p-4">
+          <div key={item.label} className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
             <p className="text-xs uppercase tracking-[0.14em] text-forensic-stone">{item.label}</p>
             <p className="mt-2 text-sm leading-6 text-forensic-text">{item.value}</p>
           </div>

@@ -1,4 +1,5 @@
 import { Background, Edge, Node, ReactFlow } from '@xyflow/react';
+import { motion } from 'framer-motion';
 import type { SemanticStep } from '../types';
 import { SemanticStepCard } from './SemanticStepCard';
 
@@ -7,6 +8,15 @@ type SemanticChainPanelProps = {
   compact?: boolean;
   activeStepId?: string;
   onSelectStep?: (id: string) => void;
+};
+
+const stepVariants = {
+  hidden: { opacity: 0, x: -12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.3, duration: 0.4, ease: 'easeOut' },
+  }),
 };
 
 export function SemanticChainPanel({
@@ -38,7 +48,7 @@ export function SemanticChainPanel({
     <div className="space-y-4">
       {steps.length === 0 && null}
       {!compact && (
-        <div className="h-40 rounded-md border border-graphite-800 bg-[#101213]">
+        <div className="h-40 rounded-md border border-forensic-gold/[0.08] bg-graphite-950">
           <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}>
             <Background color="#2D3338" gap={18} />
           </ReactFlow>
@@ -46,13 +56,20 @@ export function SemanticChainPanel({
       )}
       {steps.length > 0 && <div className="space-y-3">
         {steps.map((step, index) => (
-          <SemanticStepCard
+          <motion.div
             key={step.id}
-            step={step}
-            index={index}
-            active={step.id === activeStepId}
-            onSelect={onSelectStep}
-          />
+            variants={stepVariants}
+            custom={index}
+            initial="hidden"
+            animate={step.status !== 'pending' ? 'visible' : 'hidden'}
+          >
+            <SemanticStepCard
+              step={step}
+              index={index}
+              active={step.id === activeStepId}
+              onSelect={onSelectStep}
+            />
+          </motion.div>
         ))}
       </div>}
     </div>

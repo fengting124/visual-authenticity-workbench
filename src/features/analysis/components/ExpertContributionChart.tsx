@@ -10,7 +10,7 @@ export function ExpertContributionChart({ experts }: ExpertContributionChartProp
   const option = {
     ...darkChartBase,
     xAxis: { type: 'category', data: experts.map((expert) => expert.name), axisLabel: { color: '#A8A29A', rotate: 25 } },
-    yAxis: { type: 'value', axisLabel: { color: '#A8A29A' }, splitLine: { lineStyle: { color: '#2D3338' } } },
+    yAxis: { type: 'value', axisLabel: { color: '#A8A29A' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } } },
     series: [{ type: 'bar', data: experts.map((expert) => expert.contribution), barWidth: 22 }],
     grid: { ...darkChartBase.grid, left: 32, right: 12, bottom: 70 },
   };

@@ -1,22 +1,30 @@
 import type { ReactNode } from 'react';
-import { StatusTone } from '../types/common';
 import { cn } from '../utils/cn';
 
 type StatusBadgeProps = {
   children: ReactNode;
-  tone?: StatusTone;
+  tone?: 'neutral' | 'success' | 'warning' | 'risk' | 'olive' | 'gold';
+  className?: string;
 };
 
-const toneClass: Record<StatusTone, string> = {
-  neutral: 'border-white/10 text-[#7a8aa0] bg-white/[0.04]',
-  success: 'border-[#3ecf8e]/35 text-[#3ecf8e] bg-[#3ecf8e]/10',
-  warning: 'border-[#d4a843]/35 text-[#d4a843] bg-[#d4a843]/10',
-  risk: 'border-[#e05353]/35 text-[#e05353] bg-[#e05353]/10',
+const toneClass: Record<NonNullable<StatusBadgeProps['tone']>, string> = {
+  neutral: 'border-forensic-gold/[0.08] text-forensic-stone bg-graphite-800',
+  success: 'border-forensic-olive/35 text-forensic-olive bg-forensic-olive/10',
+  warning: 'border-forensic-warning/35 text-forensic-warning bg-forensic-warning/10',
+  risk: 'border-forensic-risk/35 text-forensic-risk bg-forensic-risk/10',
+  olive: 'border-forensic-olive/35 text-forensic-olive bg-forensic-olive/10',
+  gold: 'border-forensic-gold/35 text-forensic-gold bg-forensic-gold/10',
 };
 
-export function StatusBadge({ children, tone = 'neutral' }: StatusBadgeProps) {
+export function StatusBadge({ children, tone = 'neutral', className }: StatusBadgeProps) {
   return (
-    <span className={cn('inline-flex rounded border px-2 py-1 text-xs font-medium', toneClass[tone])}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium tabular-nums',
+        toneClass[tone],
+        className,
+      )}
+    >
       {children}
     </span>
   );

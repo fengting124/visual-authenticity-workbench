@@ -77,7 +77,7 @@ export function ImageAnnotationPage() {
 
       <SectionCard title="图像输入" eyebrow={sample.id} className="mt-5">
         <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-          <label className="rounded-md border border-graphite-800 bg-graphite-850 p-4">
+          <label className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
             <p className="text-sm font-semibold">选择图像文件</p>
             <p className="mt-2 text-xs text-forensic-stone">{localImage.name}</p>
             <input
@@ -96,9 +96,9 @@ export function ImageAnnotationPage() {
           </label>
           <div className="grid grid-cols-4 gap-3">
             {imageStages.map((stage) => (
-              <div key={stage.title} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+              <div key={stage.title} className="rounded-lg border border-forensic-gold/[0.08] bg-graphite-850 p-3">
                 <p className="text-sm font-semibold">{stage.title}</p>
-                <p className="mt-2 text-xs text-[#7a8aa0]">{stage.output}</p>
+                <p className="mt-2 text-xs text-forensic-stone">{stage.output}</p>
               </div>
             ))}
           </div>
