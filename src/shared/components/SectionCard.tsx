@@ -18,7 +18,7 @@ export function SectionCard({ title, eyebrow, action, children, className }: Sec
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24 }}
       className={cn(
-        'rounded-lg border border-graphite-800 bg-graphite-900/92 p-5 shadow-workstation',
+        'rounded-xl border border-white/10 bg-white/[0.04] p-5 shadow-workstation backdrop-blur-xl',
         className,
       )}
     >

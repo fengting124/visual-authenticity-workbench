@@ -6,6 +6,7 @@ import { ImageAnnotationPage } from '../pages/ImageAnnotationPage';
 import { OverviewPage } from '../pages/OverviewPage';
 import { ReportPage } from '../pages/ReportPage';
 import { SampleAnalysisPage } from '../pages/SampleAnalysisPage';
+import { SampleLibraryPage } from '../pages/SampleLibraryPage';
 import { VideoAnnotationPage } from '../pages/VideoAnnotationPage';
 
 export const router = createBrowserRouter([
@@ -14,6 +15,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <OverviewPage /> },
+      { path: 'samples', element: <SampleLibraryPage /> },
       { path: 'annotation', element: <AnnotationCenterPage /> },
       { path: 'annotation/image', element: <ImageAnnotationPage /> },
       { path: 'annotation/video', element: <VideoAnnotationPage /> },

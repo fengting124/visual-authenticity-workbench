@@ -1,6 +1,7 @@
 export type SemanticStep = {
   id: string;
   name: string;
+  status: string;
   input: string;
   result: string;
   explanation: string;
@@ -11,6 +12,7 @@ export type ExpertResult = {
   name: string;
   focus: string;
   score: number;
+  contribution: number;
   evidence: string;
   status: string;
 };

@@ -1,22 +1,29 @@
-import { motion } from 'framer-motion';
 import { Background, Edge, Node, ReactFlow } from '@xyflow/react';
 import type { SemanticStep } from '../types';
+import { SemanticStepCard } from './SemanticStepCard';
 
 type SemanticChainPanelProps = {
   steps: SemanticStep[];
   compact?: boolean;
+  activeStepId?: string;
+  onSelectStep?: (id: string) => void;
 };
 
-export function SemanticChainPanel({ steps, compact = false }: SemanticChainPanelProps) {
+export function SemanticChainPanel({
+  steps,
+  compact = false,
+  activeStepId,
+  onSelectStep,
+}: SemanticChainPanelProps) {
   const nodes: Node[] = steps.map((step, index) => ({
     id: step.id,
-    position: { x: index * 210, y: 20 },
+    position: { x: index * 220, y: 20 },
     data: { label: step.name },
     style: {
-      border: '1px solid #2D3338',
-      background: '#202428',
+      border: step.id === activeStepId ? '1px solid #D2A64A' : '1px solid #2D3338',
+      background: step.id === activeStepId ? 'rgba(210,166,74,.12)' : '#202428',
       color: '#F3F0EA',
-      width: 160,
+      width: 170,
       fontSize: 12,
     },
   }));
@@ -29,6 +36,7 @@ export function SemanticChainPanel({ steps, compact = false }: SemanticChainPane
 
   return (
     <div className="space-y-4">
+      {steps.length === 0 && null}
       {!compact && (
         <div className="h-40 rounded-md border border-graphite-800 bg-[#101213]">
           <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}>
@@ -36,30 +44,17 @@ export function SemanticChainPanel({ steps, compact = false }: SemanticChainPane
           </ReactFlow>
         </div>
       )}
-      <div className="space-y-3">
+      {steps.length > 0 && <div className="space-y-3">
         {steps.map((step, index) => (
-          <motion.div
+          <SemanticStepCard
             key={step.id}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.04 }}
-            whileHover={{ borderColor: '#B88A44' }}
-            className="rounded-md border border-graphite-800 bg-graphite-850 p-4"
-          >
-            <div className="mb-3 flex items-center gap-3">
-              <span className="flex h-7 w-7 items-center justify-center rounded border border-forensic-gold/40 bg-forensic-gold/10 text-xs text-forensic-gold">
-                {index + 1}
-              </span>
-              <h3 className="font-semibold">{step.name}</h3>
-            </div>
-            <div className="grid gap-3 text-sm text-forensic-stone">
-              <p><span className="text-forensic-text">Input:</span> {step.input}</p>
-              <p><span className="text-forensic-text">Processing result:</span> {step.result}</p>
-              <p><span className="text-forensic-text">Explanation:</span> {step.explanation}</p>
-            </div>
-          </motion.div>
+            step={step}
+            index={index}
+            active={step.id === activeStepId}
+            onSelect={onSelectStep}
+          />
         ))}
-      </div>
+      </div>}
     </div>
   );
 }

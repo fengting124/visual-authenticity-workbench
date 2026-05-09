@@ -7,4 +7,6 @@ yarn.lock
 .DS_Store
 coverage
 *.log
+pictures/
+videos/
 *.tsbuildinfo
