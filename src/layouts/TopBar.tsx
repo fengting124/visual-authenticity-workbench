@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { activeSample } from '../features/samples/data';
+import { useSearchParams } from 'react-router-dom';
+import { activeSample, samples } from '../features/samples/data';
 
 function LiveClock() {
   const [time, setTime] = useState(() => new Date().toLocaleTimeString('zh-CN', { hour12: false }));
@@ -17,6 +18,9 @@ function LiveClock() {
 
 export function TopBar() {
   const prefersReduced = useReducedMotion();
+  const [searchParams] = useSearchParams();
+  const sampleId = searchParams.get('sampleId');
+  const currentSample = samples.find((sample) => sample.id === sampleId) ?? activeSample;
 
   return (
     <header
@@ -33,7 +37,7 @@ export function TopBar() {
       </div>
       <div className="flex items-center gap-4 text-xs text-forensic-stone">
         <span className="rounded border border-forensic-gold/35 bg-forensic-gold/10 px-2 py-1 text-forensic-gold">
-          当前样本：{activeSample.id}
+          当前样本：{currentSample.id}
         </span>
         <div className="flex items-center gap-1.5">
           <motion.div

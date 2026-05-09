@@ -3,7 +3,6 @@ import { expertMeterConfigs } from '../data';
 import type { PhaseId } from '../hooks/useDetectionPhases';
 
 type ExpertMeterPanelProps = {
-  activePhase: PhaseId;
   isPhaseComplete: (id: PhaseId) => boolean;
   isPhaseActive: (id: PhaseId) => boolean;
   onExpertClick: (phaseId: PhaseId) => void;

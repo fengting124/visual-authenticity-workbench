@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Cpu, FileText, GitMerge, Tag, Upload } from 'lucide-react';
 import { recentTasks } from '../features/samples/data';
-import { PageShell } from '../layouts/PageShell';
 import { PipelineIconFlow } from '../shared/components/PipelineIconFlow';
 import { SectionCard } from '../shared/components/SectionCard';
 import { StatusBadge } from '../shared/components/StatusBadge';
@@ -25,7 +24,7 @@ export function OverviewPage() {
   const navigate = useNavigate();
 
   return (
-    <PageShell eyebrow="系统总览" title="发现 AI 生成内容的隐藏证据" description="自动标注 · 语义链检测 · 结构化报告">
+    <>
       <section
         className="relative flex min-h-[40vh] flex-col justify-center overflow-hidden rounded-2xl"
         style={{
@@ -127,6 +126,6 @@ export function OverviewPage() {
           ))}
         </div>
       </SectionCard>
-    </PageShell>
+    </>
   );
 }

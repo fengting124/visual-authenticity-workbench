@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Cpu,
@@ -11,6 +11,7 @@ import {
   Video,
 } from 'lucide-react';
 import { cn } from '../shared/utils/cn';
+import { sampleMetrics } from '../features/samples/data';
 
 type NavigationItem =
   | { divider: true; id: string }
@@ -50,15 +51,14 @@ export function Sidebar() {
         <h1 className="mt-2 text-lg font-semibold leading-tight text-forensic-text">视觉证据工作台</h1>
       </div>
 
-      <AnimatePresence>
-        <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
+      <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
           {navItems.map((item) => {
             if ('divider' in item) {
               return <div key={item.id} className="my-3 h-px bg-forensic-gold/10" />;
             }
 
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path;
 
             return (
               <motion.div key={item.path} variants={itemVariants}>
@@ -85,8 +85,7 @@ export function Sidebar() {
               </motion.div>
             );
           })}
-        </motion.nav>
-      </AnimatePresence>
+      </motion.nav>
 
       <div className="border-t border-forensic-gold/[0.08] p-4 text-sm">
         <p className="flex items-center gap-2 text-forensic-olive">
@@ -94,7 +93,7 @@ export function Sidebar() {
           系统就绪
         </p>
         <p className="mt-2 text-forensic-stone">
-          <span className="font-semibold text-forensic-gold tabular-nums">12</span> 待处理
+          <span className="font-semibold text-forensic-gold tabular-nums">{sampleMetrics.reviewRequired}</span> 待处理
         </p>
       </div>
     </aside>

@@ -28,5 +28,12 @@ export function saveAnnotationToSession(sampleId: string, regions: unknown[]): v
 
 export function loadAnnotationFromSession(sampleId: string): unknown[] | null {
   const raw = sessionStorage.getItem(`annotation_${sampleId}`);
-  return raw ? (JSON.parse(raw) as unknown[]) : null;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as unknown[]) : null;
+  } catch {
+    sessionStorage.removeItem(`annotation_${sampleId}`);
+    return null;
+  }
 }

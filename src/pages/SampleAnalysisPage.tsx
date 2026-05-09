@@ -22,7 +22,7 @@ function isFakeRegionList(value: unknown[] | null): value is FakeRegion[] {
 
 function phaseStepId(activePhase: PhaseId, selectedEvidence?: FakeRegion) {
   if (activePhase === 'semantic-chain') return 'global';
-  if (activePhase === 'expert-spatial' || activePhase === 'expert-frequency') return 'local';
+  if (activePhase === 'expert-spatial' || activePhase === 'expert-frequency' || activePhase === 'expert-style') return 'local';
   if (activePhase === 'expert-semantic' || activePhase === 'fusion') return 'logic';
   if (activePhase === 'complete') return 'explain';
   return selectedEvidence?.semanticStepId ?? 'global';
@@ -173,6 +173,7 @@ export function SampleAnalysisPage() {
               regions={scanRegions}
               activePhase={activePhase}
               selectedRegionId={selectedEvidenceId}
+              riskScore={selectedSample.riskScore}
               onRegionClick={setSelectedEvidenceId}
             />
             <DetectionLogStream lines={visibleLogLines} isRunning={isRunning} />
@@ -196,7 +197,6 @@ export function SampleAnalysisPage() {
 
         <SectionCard title="专家组检测" eyebrow="多证据计量">
           <ExpertMeterPanel
-            activePhase={activePhase}
             isPhaseComplete={isPhaseComplete}
             isPhaseActive={isPhaseActive}
             selectedExpert={selectedExpert}

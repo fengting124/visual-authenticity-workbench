@@ -104,7 +104,7 @@ export function FusionVerdictPanel({ isVisible, riskScore, onGenerateReport, onV
                 className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-2 border-forensic-text/80 bg-graphite-950"
                 style={{ boxShadow: `0 0 8px ${riskColor}` }}
                 initial={{ left: '0%' }}
-                animate={{ left: `${riskScore}%` }}
+                animate={{ left: `calc(${riskScore}% - 6px)` }}
                 transition={{ duration: 1.4, delay: 0.3, ease: 'easeOut' }}
               />
             </div>

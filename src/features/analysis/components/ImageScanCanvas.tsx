@@ -16,6 +16,7 @@ type ImageScanCanvasProps = {
   regions: ScanRegion[];
   activePhase: PhaseId;
   selectedRegionId: string | null;
+  riskScore: number;
   onRegionClick: (id: string) => void;
 };
 
@@ -30,6 +31,7 @@ export function ImageScanCanvas({
   regions,
   activePhase,
   selectedRegionId,
+  riskScore,
   onRegionClick,
 }: ImageScanCanvasProps) {
   const prefersReduced = useReducedMotion();
@@ -161,7 +163,7 @@ export function ImageScanCanvas({
             transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.2 }}
           >
             <span className="text-xs font-bold uppercase tracking-widest text-forensic-risk">高风险</span>
-            <span className="text-sm font-bold tabular-nums text-forensic-risk">87%</span>
+            <span className="text-sm font-bold tabular-nums text-forensic-risk">{riskScore}%</span>
           </motion.div>
         )}
       </AnimatePresence>

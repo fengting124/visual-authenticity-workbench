@@ -71,11 +71,7 @@ Tailwind custom palette:
 - src/features/analysis/components/FusionVerdictPanel.tsx
 - src/features/analysis/components/SemanticChainPanel.tsx
 - src/features/analysis/components/SemanticStepCard.tsx
-- src/features/analysis/components/ExpertCard.tsx
-- src/features/analysis/components/ExpertGroupPanel.tsx
 - src/features/analysis/components/ExpertContributionChart.tsx
-- src/features/analysis/components/EvidenceFusionPanel.tsx
-- src/features/analysis/components/RiskDecisionCard.tsx
 - src/features/analysis/components/CandidateEvidencePanel.tsx
 - src/features/samples/types.ts
 - src/features/samples/data.ts
@@ -295,7 +291,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 ## src/layouts/Sidebar.tsx
 
 ```tsx
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Cpu,
@@ -308,6 +304,7 @@ import {
   Video,
 } from 'lucide-react';
 import { cn } from '../shared/utils/cn';
+import { sampleMetrics } from '../features/samples/data';
 
 type NavigationItem =
   | { divider: true; id: string }
@@ -347,15 +344,14 @@ export function Sidebar() {
         <h1 className="mt-2 text-lg font-semibold leading-tight text-forensic-text">视觉证据工作台</h1>
       </div>
 
-      <AnimatePresence>
-        <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
+      <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
           {navItems.map((item) => {
             if ('divider' in item) {
               return <div key={item.id} className="my-3 h-px bg-forensic-gold/10" />;
             }
 
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path;
 
             return (
               <motion.div key={item.path} variants={itemVariants}>
@@ -382,8 +378,7 @@ export function Sidebar() {
               </motion.div>
             );
           })}
-        </motion.nav>
-      </AnimatePresence>
+      </motion.nav>
 
       <div className="border-t border-forensic-gold/[0.08] p-4 text-sm">
         <p className="flex items-center gap-2 text-forensic-olive">
@@ -391,7 +386,7 @@ export function Sidebar() {
           系统就绪
         </p>
         <p className="mt-2 text-forensic-stone">
-          <span className="font-semibold text-forensic-gold tabular-nums">12</span> 待处理
+          <span className="font-semibold text-forensic-gold tabular-nums">{sampleMetrics.reviewRequired}</span> 待处理
         </p>
       </div>
     </aside>
@@ -404,7 +399,8 @@ export function Sidebar() {
 ```tsx
 import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { activeSample } from '../features/samples/data';
+import { useSearchParams } from 'react-router-dom';
+import { activeSample, samples } from '../features/samples/data';
 
 function LiveClock() {
   const [time, setTime] = useState(() => new Date().toLocaleTimeString('zh-CN', { hour12: false }));
@@ -421,6 +417,9 @@ function LiveClock() {
 
 export function TopBar() {
   const prefersReduced = useReducedMotion();
+  const [searchParams] = useSearchParams();
+  const sampleId = searchParams.get('sampleId');
+  const currentSample = samples.find((sample) => sample.id === sampleId) ?? activeSample;
 
   return (
     <header
@@ -437,7 +436,7 @@ export function TopBar() {
       </div>
       <div className="flex items-center gap-4 text-xs text-forensic-stone">
         <span className="rounded border border-forensic-gold/35 bg-forensic-gold/10 px-2 py-1 text-forensic-gold">
-          当前样本：{activeSample.id}
+          当前样本：{currentSample.id}
         </span>
         <div className="flex items-center gap-1.5">
           <motion.div
@@ -836,7 +835,7 @@ function isFakeRegionList(value: unknown[] | null): value is FakeRegion[] {
 
 function phaseStepId(activePhase: PhaseId, selectedEvidence?: FakeRegion) {
   if (activePhase === 'semantic-chain') return 'global';
-  if (activePhase === 'expert-spatial' || activePhase === 'expert-frequency') return 'local';
+  if (activePhase === 'expert-spatial' || activePhase === 'expert-frequency' || activePhase === 'expert-style') return 'local';
   if (activePhase === 'expert-semantic' || activePhase === 'fusion') return 'logic';
   if (activePhase === 'complete') return 'explain';
   return selectedEvidence?.semanticStepId ?? 'global';
@@ -987,6 +986,7 @@ export function SampleAnalysisPage() {
               regions={scanRegions}
               activePhase={activePhase}
               selectedRegionId={selectedEvidenceId}
+              riskScore={selectedSample.riskScore}
               onRegionClick={setSelectedEvidenceId}
             />
             <DetectionLogStream lines={visibleLogLines} isRunning={isRunning} />
@@ -1010,7 +1010,6 @@ export function SampleAnalysisPage() {
 
         <SectionCard title="专家组检测" eyebrow="多证据计量">
           <ExpertMeterPanel
-            activePhase={activePhase}
             isPhaseComplete={isPhaseComplete}
             isPhaseActive={isPhaseActive}
             selectedExpert={selectedExpert}
@@ -1050,6 +1049,7 @@ type ImageScanCanvasProps = {
   regions: ScanRegion[];
   activePhase: PhaseId;
   selectedRegionId: string | null;
+  riskScore: number;
   onRegionClick: (id: string) => void;
 };
 
@@ -1064,6 +1064,7 @@ export function ImageScanCanvas({
   regions,
   activePhase,
   selectedRegionId,
+  riskScore,
   onRegionClick,
 }: ImageScanCanvasProps) {
   const prefersReduced = useReducedMotion();
@@ -1195,7 +1196,7 @@ export function ImageScanCanvas({
             transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.2 }}
           >
             <span className="text-xs font-bold uppercase tracking-widest text-forensic-risk">高风险</span>
-            <span className="text-sm font-bold tabular-nums text-forensic-risk">87%</span>
+            <span className="text-sm font-bold tabular-nums text-forensic-risk">{riskScore}%</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1293,7 +1294,6 @@ import { expertMeterConfigs } from '../data';
 import type { PhaseId } from '../hooks/useDetectionPhases';
 
 type ExpertMeterPanelProps = {
-  activePhase: PhaseId;
   isPhaseComplete: (id: PhaseId) => boolean;
   isPhaseActive: (id: PhaseId) => boolean;
   onExpertClick: (phaseId: PhaseId) => void;
@@ -1540,7 +1540,7 @@ export function FusionVerdictPanel({ isVisible, riskScore, onGenerateReport, onV
                 className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border-2 border-forensic-text/80 bg-graphite-950"
                 style={{ boxShadow: `0 0 8px ${riskColor}` }}
                 initial={{ left: '0%' }}
-                animate={{ left: `${riskScore}%` }}
+                animate={{ left: `calc(${riskScore}% - 6px)` }}
                 transition={{ duration: 1.4, delay: 0.3, ease: 'easeOut' }}
               />
             </div>
@@ -1601,7 +1601,6 @@ export function FusionVerdictPanel({ isVisible, riskScore, onGenerateReport, onV
 ## src/features/analysis/components/SemanticChainPanel.tsx
 
 ```tsx
-import { Background, Edge, Node, ReactFlow } from '@xyflow/react';
 import { CheckCircle2, Lock } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { SemanticStep } from '../types';
@@ -1638,7 +1637,6 @@ function fallbackLockedPhase(stepId: string): PhaseId {
 
 export function SemanticChainPanel({
   steps,
-  compact = false,
   activeStepId,
   activePhase = 'complete',
   isPhaseComplete,
@@ -1647,39 +1645,8 @@ export function SemanticChainPanel({
   const prefersReduced = useReducedMotion();
   const isUnlocked = (phaseId: PhaseId) => (phaseId === 'complete' ? activePhase === 'complete' : (isPhaseComplete?.(phaseId) ?? true));
 
-  const nodes: Node[] = steps.map((step, index) => {
-    const lockedUntilPhase = (step.lockedUntilPhase as PhaseId | undefined) ?? fallbackLockedPhase(step.id);
-    const locked = !isUnlocked(lockedUntilPhase);
-    return {
-      id: step.id,
-      position: { x: index * 220, y: 20 },
-      data: { label: step.name },
-      style: {
-        border: locked ? '1px solid rgba(168,162,154,0.12)' : step.id === activeStepId ? '1px solid #D2A64A' : '1px solid #2D3338',
-        background: locked ? 'rgba(26,29,32,0.5)' : step.id === activeStepId ? 'rgba(210,166,74,.12)' : '#202428',
-        color: locked ? 'rgba(168,162,154,0.38)' : '#F3F0EA',
-        width: 170,
-        fontSize: 12,
-      },
-    };
-  });
-
-  const edges: Edge[] = steps.slice(1).map((step, index) => ({
-    id: `${steps[index].id}-${step.id}`,
-    source: steps[index].id,
-    target: step.id,
-    style: { stroke: '#6F8F72' },
-  }));
-
   return (
     <div className="space-y-4">
-      {!compact && (
-        <div className="h-40 rounded-md border border-forensic-gold/[0.08] bg-graphite-950">
-          <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}>
-            <Background color="#2D3338" gap={18} />
-          </ReactFlow>
-        </div>
-      )}
       {steps.length > 0 && (
         <div className="space-y-3">
           {steps.map((step, index) => {
@@ -1782,123 +1749,6 @@ export function SemanticStepCard({ step, index, active, onSelect }: SemanticStep
 }
 ```
 
-## src/features/analysis/components/ExpertCard.tsx
-
-```tsx
-import { motion } from 'framer-motion';
-import type { ExpertResult } from '../types';
-import { ScoreBar } from '../../../shared/components/ScoreBar';
-import { StatusBadge } from '../../../shared/components/StatusBadge';
-
-type ExpertCardProps = {
-  expert: ExpertResult;
-  active: boolean;
-  onSelect?: (id: string) => void;
-};
-
-export function ExpertCard({ expert, active, onSelect }: ExpertCardProps) {
-  return (
-    <motion.button
-      type="button"
-      onClick={() => onSelect?.(expert.id)}
-      whileHover={{ borderColor: '#B88A44' }}
-      className={`w-full rounded-md border p-4 text-left ${
-        active ? 'border-forensic-gold/50 bg-forensic-gold/10' : 'border-forensic-gold/[0.08] bg-graphite-850'
-      }`}
-    >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-forensic-text">{expert.name}</h3>
-          <p className="mt-1 text-xs text-forensic-stone">{expert.focus}</p>
-        </div>
-        <StatusBadge tone={expert.score > 70 ? 'warning' : 'neutral'}>{expert.status}</StatusBadge>
-      </div>
-      <p className="text-4xl font-bold text-forensic-gold tabular-nums">{expert.score}%</p>
-      <div className="flex flex-wrap gap-1 mt-2">
-        {expert.keyFindings.map((finding) => (
-          <span
-            key={finding}
-            className="text-xs px-2 py-0.5 rounded-full bg-forensic-gold/10 text-forensic-gold border border-forensic-gold/20 cursor-pointer hover:bg-forensic-gold/20"
-          >
-            {finding}
-          </span>
-        ))}
-      </div>
-      <div className="mt-3">
-        <ScoreBar label="贡献度" value={expert.contribution} tone={expert.score > 70 ? 'warning' : 'olive'} />
-      </div>
-    </motion.button>
-  );
-}
-```
-
-## src/features/analysis/components/ExpertGroupPanel.tsx
-
-```tsx
-import { Background, Edge, Node, ReactFlow } from '@xyflow/react';
-import type { ExpertResult } from '../types';
-import { ExpertCard } from './ExpertCard';
-
-type ExpertGroupPanelProps = {
-  experts: ExpertResult[];
-  showGraph?: boolean;
-  activeExpertIds?: string[];
-  onSelectExpert?: (id: string) => void;
-};
-
-export function ExpertGroupPanel({
-  experts,
-  showGraph = false,
-  activeExpertIds = [],
-  onSelectExpert,
-}: ExpertGroupPanelProps) {
-  const nodes: Node[] = [
-    ...experts.map((expert, index) => ({
-      id: expert.id,
-      position: { x: index % 2 === 0 ? 20 : 270, y: index < 2 ? 20 : 150 },
-      data: { label: expert.name },
-      style: {
-        background: activeExpertIds.includes(expert.id) ? 'rgba(111,143,114,.18)' : '#202428',
-        color: '#F3F0EA',
-        border: activeExpertIds.includes(expert.id) ? '1px solid #6F8F72' : '1px solid #2D3338',
-      },
-    })),
-    {
-      id: 'fusion',
-      position: { x: 150, y: 92 },
-      data: { label: '融合结果' },
-      style: { background: '#B88A44', color: '#111315', border: '1px solid #B88A44' },
-    },
-  ];
-  const edges: Edge[] = experts.map((expert) => ({
-    id: `${expert.id}-fusion`,
-    source: expert.id,
-    target: 'fusion',
-    style: { stroke: '#B88A44' },
-  }));
-
-  return (
-    <div className="space-y-4">
-      {showGraph && (
-        <div className="h-64 rounded-md border border-forensic-gold/[0.08] bg-graphite-950">
-          <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}>
-            <Background color="#2D3338" gap={18} />
-          </ReactFlow>
-        </div>
-      )}
-      {experts.map((expert) => (
-        <ExpertCard
-          key={expert.id}
-          expert={expert}
-          active={activeExpertIds.includes(expert.id)}
-          onSelect={onSelectExpert}
-        />
-      ))}
-    </div>
-  );
-}
-```
-
 ## src/features/analysis/components/ExpertContributionChart.tsx
 
 ```tsx
@@ -1920,112 +1770,6 @@ export function ExpertContributionChart({ experts }: ExpertContributionChartProp
   };
 
   return <ReactECharts option={option} style={{ height: 240 }} />;
-}
-```
-
-## src/features/analysis/components/EvidenceFusionPanel.tsx
-
-```tsx
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { evidenceSummary } from '../data';
-import { RiskDecisionCard } from './RiskDecisionCard';
-
-export function EvidenceFusionPanel() {
-  const navigate = useNavigate();
-  const [creating, setCreating] = useState(false);
-
-  function generateReport() {
-    setCreating(true);
-    window.setTimeout(() => navigate('/report'), 800);
-  }
-
-  return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-      <div className="grid flex-1 grid-cols-4 gap-3">
-        {evidenceSummary.map((item) => (
-          <div key={item.label} className="rounded-md border border-forensic-gold/[0.08] bg-graphite-850 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-forensic-stone">{item.label}</p>
-            <p className="mt-2 text-sm leading-6 text-forensic-text">{item.value}</p>
-          </div>
-        ))}
-      </div>
-      <div className="lg:w-[360px]">
-        <RiskDecisionCard creating={creating} onGenerate={generateReport} />
-      </div>
-    </div>
-  );
-}
-```
-
-## src/features/analysis/components/RiskDecisionCard.tsx
-
-```tsx
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ScoreBar } from '../../../shared/components/ScoreBar';
-import { StatusBadge } from '../../../shared/components/StatusBadge';
-
-type RiskDecisionCardProps = {
-  creating: boolean;
-  onGenerate: () => void;
-};
-
-function AnimatedScore({ target }: { target: number }) {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    const startTime = performance.now();
-    const duration = 1200;
-    let frame = 0;
-
-    const step = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * target));
-      if (progress < 1) frame = requestAnimationFrame(step);
-    };
-
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [target]);
-
-  return <span>{display}</span>;
-}
-
-export function RiskDecisionCard({ creating, onGenerate }: RiskDecisionCardProps) {
-  return (
-    <div className="rounded-md border border-forensic-warning/35 bg-forensic-warning/10 p-4">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-forensic-warning">最终融合结果</p>
-          <h3 className="mt-1 text-xl font-semibold text-forensic-text">高风险</h3>
-        </div>
-        <StatusBadge tone="warning">需要复核</StatusBadge>
-      </div>
-      <div className="mb-2 text-5xl font-bold tabular-nums text-forensic-warning">
-        <AnimatedScore target={82} />
-        <span className="text-xl">%</span>
-      </div>
-      <ScoreBar label="最终风险分数" value={82} tone="warning" />
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={onGenerate}
-          className="rounded-md border border-forensic-gold/45 bg-graphite-950 px-4 py-2 text-sm font-medium text-forensic-gold"
-        >
-          {creating ? '正在生成报告' : '生成报告'}
-        </button>
-        <Link
-          to="/report"
-          className="rounded-md border border-forensic-gold/[0.08] bg-graphite-950 px-4 py-2 text-center text-sm font-medium text-forensic-text"
-        >
-          查看报告
-        </Link>
-      </div>
-    </div>
-  );
 }
 ```
 
@@ -2062,7 +1806,7 @@ export function CandidateEvidencePanel({ sample, selectedId, onSelect }: Candida
               <p className="text-sm font-medium">{candidate.id} · {candidate.label}</p>
               <p className="mt-1 text-xs leading-5 text-forensic-stone">{candidate.clue}</p>
             </div>
-            <StatusBadge tone="warning">{'riskScore' in candidate ? candidate.riskScore : candidate.confidence}</StatusBadge>
+            <StatusBadge tone="warning">{`${'riskScore' in candidate ? candidate.riskScore : candidate.confidence}%`}</StatusBadge>
           </div>
         </button>
       ))}
@@ -2425,7 +2169,7 @@ export const sampleMetrics = {
 export const recentTasks = [
   {
     id: 'task-001',
-    sampleId: 'img-003',
+    sampleId: 'IMG-LIB-006',
     type: 'image',
     status: 'done',
     riskLevel: 'high',
@@ -2434,7 +2178,7 @@ export const recentTasks = [
   },
   {
     id: 'task-002',
-    sampleId: 'img-001',
+    sampleId: 'IMG-DEMO-REAL',
     type: 'image',
     status: 'done',
     riskLevel: 'low',
@@ -2443,7 +2187,7 @@ export const recentTasks = [
   },
   {
     id: 'task-003',
-    sampleId: 'vid-002',
+    sampleId: 'VID-LIB-002',
     type: 'video',
     status: 'done',
     riskLevel: 'medium',
@@ -2459,7 +2203,6 @@ export const recentTasks = [
 import { useNavigate } from 'react-router-dom';
 import { Cpu, FileText, GitMerge, Tag, Upload } from 'lucide-react';
 import { recentTasks } from '../features/samples/data';
-import { PageShell } from '../layouts/PageShell';
 import { PipelineIconFlow } from '../shared/components/PipelineIconFlow';
 import { SectionCard } from '../shared/components/SectionCard';
 import { StatusBadge } from '../shared/components/StatusBadge';
@@ -2483,7 +2226,7 @@ export function OverviewPage() {
   const navigate = useNavigate();
 
   return (
-    <PageShell eyebrow="系统总览" title="发现 AI 生成内容的隐藏证据" description="自动标注 · 语义链检测 · 结构化报告">
+    <>
       <section
         className="relative flex min-h-[40vh] flex-col justify-center overflow-hidden rounded-2xl"
         style={{
@@ -2585,7 +2328,7 @@ export function OverviewPage() {
           ))}
         </div>
       </SectionCard>
-    </PageShell>
+    </>
   );
 }
 ```
@@ -3258,13 +3001,11 @@ export const reportSections: ReportSectionData[] = [
 ```tsx
 import { useState } from 'react';
 import { activeSample, samples } from '../../samples/data';
-import { expertResults, semanticSteps } from '../../analysis/data';
 import type { ReportSectionData } from '../types';
 import { ScoreBar } from '../../../shared/components/ScoreBar';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { VideoPlayer } from '../../../shared/components/VideoPlayer';
 import { TYPE_LABEL } from '../../../shared/utils/format';
-import { EvidenceList } from './EvidenceList';
 import { ReportSection } from './ReportSection';
 
 type ReportPreviewProps = {
@@ -3386,42 +3127,6 @@ export function ReportPreview({ sections, onExport }: ReportPreviewProps) {
           </div>
         ))}
 
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">
-            {selectedSample.type === 'image' ? '可疑图像区域' : '可疑视频片段'}
-          </h3>
-          <EvidenceList
-            items={
-              selectedSample.type === 'image'
-                ? selectedSample.regions.map((region) => ({
-                    label: `${region.id} · ${region.label}`,
-                    value: `${region.clue} 置信度 ${region.confidence}。`,
-                  }))
-                : selectedSample.segments.map((segment) => ({
-                    label: `${segment.id} · ${segment.label}`,
-                    value: `${segment.start} 至 ${segment.end}，${segment.clue} 风险分数 ${segment.riskScore}。`,
-                  }))
-            }
-          />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">语义链追踪</h3>
-          <EvidenceList items={semanticSteps.map((step) => ({ label: step.name, value: step.result }))} />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">专家组追踪</h3>
-          <EvidenceList items={expertResults.map((expert) => ({ label: expert.name, value: expert.evidence }))} />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">复核建议</h3>
-          <div className="grid gap-3 text-sm md:grid-cols-4">
-            {['人工复核高风险区域', '核验原始来源', '比对内容凭证', '补充同源样本'].map((item) => (
-              <div key={item} className="rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4 text-center">
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
         <button
           type="button"
           onClick={onExport}
@@ -3554,7 +3259,14 @@ export function saveAnnotationToSession(sampleId: string, regions: unknown[]): v
 
 export function loadAnnotationFromSession(sampleId: string): unknown[] | null {
   const raw = sessionStorage.getItem(`annotation_${sampleId}`);
-  return raw ? (JSON.parse(raw) as unknown[]) : null;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as unknown[]) : null;
+  } catch {
+    sessionStorage.removeItem(`annotation_${sampleId}`);
+    return null;
+  }
 }
 ```
 
@@ -3643,7 +3355,6 @@ select {
   *::before,
   *::after {
     animation: none !important;
-    transition: none !important;
     scroll-behavior: auto !important;
   }
 }

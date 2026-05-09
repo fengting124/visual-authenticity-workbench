@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { activeSample, samples } from '../../samples/data';
-import { expertResults, semanticSteps } from '../../analysis/data';
 import type { ReportSectionData } from '../types';
 import { ScoreBar } from '../../../shared/components/ScoreBar';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { VideoPlayer } from '../../../shared/components/VideoPlayer';
 import { TYPE_LABEL } from '../../../shared/utils/format';
-import { EvidenceList } from './EvidenceList';
 import { ReportSection } from './ReportSection';
 
 type ReportPreviewProps = {
@@ -128,42 +126,6 @@ export function ReportPreview({ sections, onExport }: ReportPreviewProps) {
           </div>
         ))}
 
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">
-            {selectedSample.type === 'image' ? '可疑图像区域' : '可疑视频片段'}
-          </h3>
-          <EvidenceList
-            items={
-              selectedSample.type === 'image'
-                ? selectedSample.regions.map((region) => ({
-                    label: `${region.id} · ${region.label}`,
-                    value: `${region.clue} 置信度 ${region.confidence}。`,
-                  }))
-                : selectedSample.segments.map((segment) => ({
-                    label: `${segment.id} · ${segment.label}`,
-                    value: `${segment.start} 至 ${segment.end}，${segment.clue} 风险分数 ${segment.riskScore}。`,
-                  }))
-            }
-          />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">语义链追踪</h3>
-          <EvidenceList items={semanticSteps.map((step) => ({ label: step.name, value: step.result }))} />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">专家组追踪</h3>
-          <EvidenceList items={expertResults.map((expert) => ({ label: expert.name, value: expert.evidence }))} />
-        </section>
-        <section className="border-t border-forensic-gold/[0.08] py-5">
-          <h3 className="mb-4 text-base font-semibold">复核建议</h3>
-          <div className="grid gap-3 text-sm md:grid-cols-4">
-            {['人工复核高风险区域', '核验原始来源', '比对内容凭证', '补充同源样本'].map((item) => (
-              <div key={item} className="rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4 text-center">
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
         <button
           type="button"
           onClick={onExport}

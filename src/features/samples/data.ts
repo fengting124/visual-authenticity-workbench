@@ -291,7 +291,7 @@ export const sampleMetrics = {
 export const recentTasks = [
   {
     id: 'task-001',
-    sampleId: 'img-003',
+    sampleId: 'IMG-LIB-006',
     type: 'image',
     status: 'done',
     riskLevel: 'high',
@@ -300,7 +300,7 @@ export const recentTasks = [
   },
   {
     id: 'task-002',
-    sampleId: 'img-001',
+    sampleId: 'IMG-DEMO-REAL',
     type: 'image',
     status: 'done',
     riskLevel: 'low',
@@ -309,7 +309,7 @@ export const recentTasks = [
   },
   {
     id: 'task-003',
-    sampleId: 'vid-002',
+    sampleId: 'VID-LIB-002',
     type: 'video',
     status: 'done',
     riskLevel: 'medium',

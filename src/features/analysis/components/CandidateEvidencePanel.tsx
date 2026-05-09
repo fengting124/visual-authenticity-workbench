@@ -28,7 +28,7 @@ export function CandidateEvidencePanel({ sample, selectedId, onSelect }: Candida
               <p className="text-sm font-medium">{candidate.id} · {candidate.label}</p>
               <p className="mt-1 text-xs leading-5 text-forensic-stone">{candidate.clue}</p>
             </div>
-            <StatusBadge tone="warning">{'riskScore' in candidate ? candidate.riskScore : candidate.confidence}</StatusBadge>
+            <StatusBadge tone="warning">{`${'riskScore' in candidate ? candidate.riskScore : candidate.confidence}%`}</StatusBadge>
           </div>
         </button>
       ))}
