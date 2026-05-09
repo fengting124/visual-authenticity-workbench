@@ -5,25 +5,18 @@ import type { ReportSectionData } from '../types';
 import { ScoreBar } from '../../../shared/components/ScoreBar';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { VideoPlayer } from '../../../shared/components/VideoPlayer';
+import { TYPE_LABEL } from '../../../shared/utils/format';
 import { EvidenceList } from './EvidenceList';
 import { ReportSection } from './ReportSection';
 
 type ReportPreviewProps = {
   sections: ReportSectionData[];
+  onExport: () => void;
 };
 
-const catalog = [
-  '报告摘要',
-  '样本信息',
-  '自动证据标注',
-  '语义链理解',
-  '专家组检测',
-  '证据融合',
-  '最终结论',
-  '复核建议',
-];
+const catalog = ['报告摘要', '样本信息', '自动证据标注', '语义链理解', '专家组检测', '证据融合', '最终结论', '复核建议'];
 
-export function ReportPreview({ sections }: ReportPreviewProps) {
+export function ReportPreview({ sections, onExport }: ReportPreviewProps) {
   const [selectedSampleId, setSelectedSampleId] = useState(activeSample.id);
   const selectedSample = samples.find((sample) => sample.id === selectedSampleId) ?? activeSample;
 
@@ -43,15 +36,42 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
           ))}
         </div>
       </aside>
+
       <article className="rounded-lg border border-graphite-800 bg-[#16191b]/90 p-8 shadow-workstation backdrop-blur">
+        <div className="border-b border-white/10 pb-4 mb-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-lg font-semibold text-white">视觉内容真实性分析报告</h1>
+              <p className="text-xs text-slate-400 mt-1">Visual Content Authenticity Analysis Report</p>
+            </div>
+            <span className="text-xs px-2 py-1 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              内部取证文档
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mt-4 text-xs text-slate-400">
+            <div>
+              <span className="text-slate-500">报告编号</span>
+              <br />
+              <span className="text-slate-300">VAW-2026001</span>
+            </div>
+            <div>
+              <span className="text-slate-500">生成时间</span>
+              <br />
+              <span className="text-slate-300">2026-05-09 14:32:01</span>
+            </div>
+            <div>
+              <span className="text-slate-500">系统版本</span>
+              <br />
+              <span className="text-slate-300">v0.9.0-alpha</span>
+            </div>
+          </div>
+        </div>
+
         <section id="report-0" className="mb-8 border-b border-graphite-800 pb-6">
           <div className="flex items-start justify-between gap-6">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-forensic-gold">结构化证据报告</p>
               <h2 className="mt-2 text-2xl font-semibold">视觉生成内容证据分析</h2>
-              <p className="mt-2 text-sm text-forensic-stone">
-                候选证据与分析证据分层呈现，便于复核、归档与后续接入真实服务。
-              </p>
             </div>
             <StatusBadge tone="warning">待复核</StatusBadge>
           </div>
@@ -72,11 +92,11 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
             </div>
             <div className="rounded-md border border-graphite-800 bg-graphite-900 p-4">
               <p className="text-xs text-forensic-stone">样本类型</p>
-              <p className="mt-2 font-semibold">{selectedSample.type === 'image' ? '图像' : '视频'}</p>
+              <p className="mt-2 font-semibold">{TYPE_LABEL[selectedSample.type]}</p>
             </div>
             <div className="rounded-md border border-graphite-800 bg-graphite-900 p-4">
               <p className="text-xs text-forensic-stone">检测时间</p>
-              <p className="mt-2 font-semibold">2026-05-08 12:10</p>
+              <p className="mt-2 font-semibold">2026-05-09 14:32</p>
             </div>
             <div className="rounded-md border border-forensic-warning/35 bg-forensic-warning/10 p-4">
               <ScoreBar label="最终风险分数" value={selectedSample.riskScore} tone="warning" />
@@ -93,12 +113,7 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
                 <div
                   key={region.id}
                   className="absolute rounded border-2 border-[#e05353] bg-[#e05353]/10"
-                  style={{
-                    left: `${region.x}%`,
-                    top: `${region.y}%`,
-                    width: `${region.width}%`,
-                    height: `${region.height}%`,
-                  }}
+                  style={{ left: `${region.x}%`, top: `${region.y}%`, width: `${region.width}%`, height: `${region.height}%` }}
                 />
               ))}
             </div>
@@ -151,6 +166,7 @@ export function ReportPreview({ sections }: ReportPreviewProps) {
         </section>
         <button
           type="button"
+          onClick={onExport}
           className="mt-2 rounded-md border border-forensic-gold/40 bg-forensic-gold/10 px-4 py-2 text-sm font-medium text-forensic-gold"
         >
           导出报告

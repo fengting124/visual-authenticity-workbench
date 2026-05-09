@@ -287,3 +287,33 @@ export const sampleMetrics = {
   reviewRequired: samples.filter((sample) => sample.annotationStatus === 'review').length,
   reports: samples.filter((sample) => sample.reportStatus === 'complete').length,
 };
+
+export const recentTasks = [
+  {
+    id: 'task-001',
+    sampleId: 'img-003',
+    type: 'image',
+    status: 'done',
+    riskLevel: 'high',
+    completedAt: '2026-05-09 14:32',
+    label: '面部合成检测',
+  },
+  {
+    id: 'task-002',
+    sampleId: 'img-001',
+    type: 'image',
+    status: 'done',
+    riskLevel: 'low',
+    completedAt: '2026-05-09 13:15',
+    label: '场景一致性验证',
+  },
+  {
+    id: 'task-003',
+    sampleId: 'vid-002',
+    type: 'video',
+    status: 'done',
+    riskLevel: 'medium',
+    completedAt: '2026-05-09 11:48',
+    label: '时序边界检测',
+  },
+];

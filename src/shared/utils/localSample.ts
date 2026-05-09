@@ -21,3 +21,12 @@ export function readFileAsDataUrl(file: File, onLoad: (dataUrl: string) => void)
   };
   reader.readAsDataURL(file);
 }
+
+export function saveAnnotationToSession(sampleId: string, regions: unknown[]): void {
+  sessionStorage.setItem(`annotation_${sampleId}`, JSON.stringify(regions));
+}
+
+export function loadAnnotationFromSession(sampleId: string): unknown[] | null {
+  const raw = sessionStorage.getItem(`annotation_${sampleId}`);
+  return raw ? (JSON.parse(raw) as unknown[]) : null;
+}

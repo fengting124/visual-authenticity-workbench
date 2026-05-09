@@ -1,19 +1,25 @@
 import ReactECharts from 'echarts-for-react';
 import { Link } from 'react-router-dom';
-import { Cpu } from 'lucide-react';
+import { Cpu, Video as VideoIcon } from 'lucide-react';
 import { expertResults } from '../features/analysis/data';
-import { SemanticChainPanel } from '../features/analysis/components/SemanticChainPanel';
 import { samples } from '../features/samples/data';
 import { PageShell } from '../layouts/PageShell';
 import { SectionCard } from '../shared/components/SectionCard';
 import { StatusBadge } from '../shared/components/StatusBadge';
+import { darkChartBase } from '../shared/utils/chartTheme';
+
+const semanticNodes = ['全局语义', '局部区域', '逻辑一致性', '解释输出'];
 
 export function AnalysisCenterPage() {
   const expertOption = {
-    backgroundColor: 'transparent',
-    color: ['#00c4ff'],
+    ...darkChartBase,
     radar: {
-      indicator: expertResults.map((expert) => ({ name: expert.name.replace('专家', ''), max: 100 })),
+      indicator: [
+        { name: '空间', max: 100 },
+        { name: '频域', max: 100 },
+        { name: '风格', max: 100 },
+        { name: '语义', max: 100 },
+      ],
       axisName: { color: '#7a8aa0' },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,.08)' } },
       splitArea: { areaStyle: { color: ['rgba(255,255,255,.03)', 'rgba(255,255,255,.01)'] } },
@@ -23,31 +29,40 @@ export function AnalysisCenterPage() {
 
   return (
     <PageShell eyebrow="检测中心" title="可解释 AI 检测" description="语义链 × 专家组 × 证据融合">
-      <section className="rounded-2xl border border-[#00c4ff]/25 bg-[#00c4ff]/[0.05] p-8">
-        <div className="flex items-center justify-between gap-5">
+      <section className="rounded-2xl border border-cyan-500/25 bg-cyan-500/[0.05] p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-4xl font-bold">可解释 AI 检测</h2>
             <p className="mt-3 text-[#7a8aa0]">语义链 × 专家组 × 证据融合</p>
           </div>
-          <Link to="/analysis/sample" className="inline-flex items-center gap-2 rounded-xl bg-[#00c4ff] px-6 py-3 text-sm font-semibold text-[#06101a]">
+          <Link to="/analysis/sample" className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-[#06101a]">
             <Cpu className="h-4 w-4" />
             进入检测工作台
           </Link>
         </div>
       </section>
 
+      <div className="mt-5 opacity-40 cursor-not-allowed rounded-xl border border-white/10 p-6 flex items-center gap-4">
+        <VideoIcon size={32} className="text-slate-500" />
+        <div>
+          <p className="text-sm font-medium text-slate-400">视频片段检测</p>
+          <p className="text-xs text-slate-500">时序分析模块开发中，敬请期待</p>
+        </div>
+        <span className="ml-auto text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-400">规划中</span>
+      </div>
+
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <SectionCard title="语义链">
-          <SemanticChainPanel steps={[]} compact />
           <div className="grid grid-cols-4 gap-2">
-            {['全局语义', '局部区域', '逻辑一致', '解释输出'].map((item) => (
-              <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-5 text-center text-sm text-[#00c4ff]">
+            {semanticNodes.map((item, index) => (
+              <div key={item} className="relative flex h-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-center text-sm text-cyan-400">
                 {item}
+                {index < semanticNodes.length - 1 && <span className="absolute -right-2 top-1/2 h-px w-2 bg-cyan-400/40" />}
               </div>
             ))}
           </div>
         </SectionCard>
-        <SectionCard title="专家组">
+        <SectionCard title="专家贡献">
           <ReactECharts option={expertOption} style={{ height: 260 }} />
         </SectionCard>
       </div>

@@ -3,7 +3,7 @@ import { KeyframeStrip } from '../../annotation/components/KeyframeStrip';
 import { EmptyAssetPlaceholder } from '../../../shared/components/EmptyAssetPlaceholder';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import { VideoPlayer } from '../../../shared/components/VideoPlayer';
-import { riskLabel, toneForRisk } from '../../../shared/utils/format';
+import { SOURCE_LABEL, riskLabel, toneForRisk } from '../../../shared/utils/format';
 
 type SampleViewerProps = {
   sample: EvidenceSample;
@@ -36,7 +36,7 @@ export function SampleViewer({ sample, imageSrc }: SampleViewerProps) {
       <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm">
         <div className="flex justify-between gap-4">
           <span className="text-[#7a8aa0]">样本来源</span>
-          <span>{sample.source === 'generated' ? '生成' : sample.source === 'real' ? '真实' : '未知'}</span>
+          <span>{SOURCE_LABEL[sample.source] ?? sample.source}</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-[#7a8aa0]">类别</span>

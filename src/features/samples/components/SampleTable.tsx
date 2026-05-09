@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom';
 import type { EvidenceSample } from '../types';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
-import { riskLabel, statusLabel, toneForRisk, toneForStatus } from '../../../shared/utils/format';
+import {
+  RISK_LABEL,
+  SOURCE_LABEL,
+  TYPE_LABEL,
+  riskLabel,
+  statusLabel,
+  toneForRisk,
+  toneForStatus,
+} from '../../../shared/utils/format';
 
 type SampleTableProps = {
   samples: EvidenceSample[];
@@ -20,7 +28,7 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
             <th className="px-4 py-3 text-left">来源</th>
             <th className="px-4 py-3 text-left">生成器</th>
             <th className="px-4 py-3 text-left">标注</th>
-            <th className="px-4 py-3 text-left">分析</th>
+            <th className="px-4 py-3 text-left">检测</th>
             <th className="px-4 py-3 text-left">报告</th>
             <th className="px-4 py-3 text-left">风险</th>
             <th className="px-4 py-3 text-left">创建时间</th>
@@ -41,8 +49,8 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
                   <span className="mt-1 block text-xs text-forensic-stone">{sample.title}</span>
                 </button>
               </td>
-              <td className="px-4 py-3 text-forensic-stone">{sample.type === 'image' ? '图像' : '视频'}</td>
-              <td className="px-4 py-3 text-forensic-stone">{sample.source === 'generated' ? '生成' : sample.source === 'real' ? '真实' : '未知'}</td>
+              <td className="px-4 py-3 text-forensic-stone">{TYPE_LABEL[sample.type] ?? sample.type}</td>
+              <td className="px-4 py-3 text-forensic-stone">{SOURCE_LABEL[sample.source] ?? sample.source}</td>
               <td className="px-4 py-3 text-forensic-stone">{sample.generator ?? '未知'}</td>
               <td className="px-4 py-3">
                 <StatusBadge tone={toneForStatus(sample.annotationStatus)}>{statusLabel(sample.annotationStatus)}</StatusBadge>
@@ -54,14 +62,25 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
                 <StatusBadge tone={toneForStatus(sample.reportStatus)}>{statusLabel(sample.reportStatus)}</StatusBadge>
               </td>
               <td className="px-4 py-3">
-                <StatusBadge tone={toneForRisk(sample.riskLevel)}>{riskLabel(sample.riskLevel)}</StatusBadge>
+                <StatusBadge tone={toneForRisk(sample.riskLevel)}>{RISK_LABEL[sample.riskLevel] ?? riskLabel(sample.riskLevel)}</StatusBadge>
               </td>
               <td className="px-4 py-3 text-forensic-stone">{sample.createdAt}</td>
               <td className="px-4 py-3">
                 <div className="flex gap-2 text-xs">
-                  <Link to={sample.type === 'image' ? '/annotation/image' : '/annotation/video'} className="text-forensic-gold">标注</Link>
-                  <Link to="/analysis/sample" className="text-forensic-olive">分析</Link>
-                  <Link to="/report" className="text-forensic-stone">报告</Link>
+                  <Link
+                    to={`/${sample.type === 'image' ? 'annotation/image' : 'annotation/video'}?sampleId=${sample.id}`}
+                    className="text-forensic-gold"
+                  >
+                    标注
+                  </Link>
+                  {sample.type === 'image' && (
+                    <Link to={`/analysis/sample?sampleId=${sample.id}`} className="text-forensic-olive">
+                      分析
+                    </Link>
+                  )}
+                  <Link to={`/report?sampleId=${sample.id}`} className="text-forensic-stone">
+                    报告
+                  </Link>
                 </div>
               </td>
             </tr>

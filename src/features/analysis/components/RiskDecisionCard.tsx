@@ -13,11 +13,11 @@ export function RiskDecisionCard({ creating, onGenerate }: RiskDecisionCardProps
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.16em] text-forensic-gold">最终融合结果</p>
-          <h3 className="mt-1 text-xl font-semibold">中高真实性风险</h3>
+          <h3 className="mt-1 text-xl font-semibold">高风险</h3>
         </div>
         <StatusBadge tone="warning">需要复核</StatusBadge>
       </div>
-      <ScoreBar label="最终风险分数" value={72} tone="warning" />
+      <ScoreBar label="最终风险分数" value={82} tone="warning" />
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
@@ -26,10 +26,7 @@ export function RiskDecisionCard({ creating, onGenerate }: RiskDecisionCardProps
         >
           {creating ? '正在生成报告' : '生成报告'}
         </button>
-        <Link
-          to="/report"
-          className="rounded-md border border-graphite-800 bg-graphite-950 px-4 py-2 text-center text-sm font-medium"
-        >
+        <Link to="/report" className="rounded-md border border-graphite-800 bg-graphite-950 px-4 py-2 text-center text-sm font-medium">
           查看报告
         </Link>
       </div>

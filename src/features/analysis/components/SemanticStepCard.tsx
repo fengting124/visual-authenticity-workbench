@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { SemanticStep } from '../types';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
-import { toneForStatus } from '../../../shared/utils/format';
+import { statusLabel, toneForStatus } from '../../../shared/utils/format';
 
 type SemanticStepCardProps = {
   step: SemanticStep;
@@ -27,12 +27,21 @@ export function SemanticStepCard({ step, index, active, onSelect }: SemanticStep
           </span>
           <h3 className="font-semibold">{step.name}</h3>
         </div>
-        <StatusBadge tone={toneForStatus(step.status)}>{step.status}</StatusBadge>
+        <StatusBadge tone={toneForStatus(step.status)}>{statusLabel(step.status)}</StatusBadge>
       </div>
       <div className="grid gap-3 text-sm text-forensic-stone">
-        <p><span className="text-forensic-text">输入证据：</span>{step.input}</p>
-        <p><span className="text-forensic-text">中间结果：</span>{step.result}</p>
-        <p><span className="text-forensic-text">解释文本：</span>{step.explanation}</p>
+        <p>
+          <span className="text-forensic-text">输入证据：</span>
+          {step.input}
+        </p>
+        <p>
+          <span className="text-forensic-text">中间结果：</span>
+          {step.result}
+        </p>
+        <p>
+          <span className="text-forensic-text">解释文本：</span>
+          {step.explanation}
+        </p>
       </div>
     </motion.button>
   );

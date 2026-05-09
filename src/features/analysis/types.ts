@@ -14,6 +14,7 @@ export type ExpertResult = {
   score: number;
   contribution: number;
   evidence: string;
+  keyFindings: string[];
   status: string;
 };
 
