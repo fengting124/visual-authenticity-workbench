@@ -6,7 +6,6 @@ import { SemanticStepCard } from './SemanticStepCard';
 
 type SemanticChainPanelProps = {
   steps: SemanticStep[];
-  compact?: boolean;
   activeStepId?: string;
   activePhase?: PhaseId;
   isPhaseComplete?: (id: PhaseId) => boolean;
@@ -27,7 +26,6 @@ function fallbackLockedPhase(stepId: string): PhaseId {
     global: 'semantic-chain',
     local: 'expert-spatial',
     logic: 'expert-semantic',
-    explain: 'complete',
   };
   return map[stepId] ?? 'semantic-chain';
 }
@@ -44,6 +42,22 @@ export function SemanticChainPanel({
 
   return (
     <div className="space-y-4">
+      <div className="grid gap-2 rounded-lg border border-forensic-gold/[0.08] bg-graphite-900 p-3 text-[11px] md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+        <div className="flex items-center gap-2">
+          <span className="font-mono tabular-nums text-forensic-gold">[CLIP]</span>
+          <span className="text-forensic-stone">全局语义浓缩</span>
+        </div>
+        <span className="hidden text-forensic-gold/50 md:block">→</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono tabular-nums text-forensic-gold">[Grounding DINO]</span>
+          <span className="text-forensic-stone">局部一致性校验</span>
+        </div>
+        <span className="hidden text-forensic-gold/50 md:block">→</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono tabular-nums text-forensic-gold">[ConceptNet + LLM]</span>
+          <span className="text-forensic-stone">双分支逻辑校验</span>
+        </div>
+      </div>
       {steps.length > 0 && (
         <div className="space-y-3">
           {steps.map((step, index) => {
@@ -75,7 +89,7 @@ export function SemanticChainPanel({
                       ? { boxShadow: ['0 0 0 rgba(184,138,68,0)', '0 0 18px rgba(184,138,68,0.18)', '0 0 0 rgba(184,138,68,0)'] }
                       : undefined
                   }
-                  transition={{ duration: 1.1, repeat: Infinity }}
+                  transition={processing && !prefersReduced ? { duration: 1.1, repeat: Infinity } : { duration: 0.2 }}
                 >
                   <div className="mb-2 flex items-center gap-2 text-xs text-forensic-olive">
                     <CheckCircle2 size={12} />

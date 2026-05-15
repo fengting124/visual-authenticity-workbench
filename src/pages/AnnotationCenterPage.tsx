@@ -1,7 +1,8 @@
 import ReactECharts from 'echarts-for-react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ImageIcon, Video } from 'lucide-react';
-import { samples } from '../features/samples/data';
+import { sampleMetrics, samples } from '../features/samples/data';
 import { PageShell } from '../layouts/PageShell';
 import { SectionCard } from '../shared/components/SectionCard';
 import { StatusBadge } from '../shared/components/StatusBadge';
@@ -10,6 +11,11 @@ import { statusLabel, toneForStatus, TYPE_LABEL } from '../shared/utils/format';
 
 export function AnnotationCenterPage() {
   const navigate = useNavigate();
+  const annotatedPct = sampleMetrics.total > 0 ? Math.round((sampleMetrics.annotated / sampleMetrics.total) * 100) : 0;
+  const imageCompleted = samples.filter((sample) => sample.type === 'image' && sample.annotationStatus !== 'pending').length;
+  const imagePending = sampleMetrics.images - imageCompleted;
+  const videoCompleted = samples.filter((sample) => sample.type === 'video' && sample.annotationStatus !== 'pending').length;
+  const videoPending = sampleMetrics.videos - videoCompleted;
 
   const annotationProgressOption = {
     ...darkChartBase,
@@ -18,10 +24,10 @@ export function AnnotationCenterPage() {
         type: 'pie',
         radius: ['72%', '88%'],
         silent: true,
-        label: { show: true, position: 'center', formatter: '72%', color: '#B88A44', fontSize: 34, fontWeight: 700 },
+        label: { show: true, position: 'center', formatter: `${annotatedPct}%`, color: '#B88A44', fontSize: 34, fontWeight: 700 },
         data: [
-          { value: 72, name: '完成' },
-          { value: 28, name: '剩余' },
+          { value: annotatedPct, name: '完成', itemStyle: { color: '#B88A44' } },
+          { value: 100 - annotatedPct, name: '剩余', itemStyle: { color: '#2D3338' } },
         ],
       },
     ],
@@ -42,26 +48,77 @@ export function AnnotationCenterPage() {
   return (
     <PageShell eyebrow="标注中心" title="数据标注" description="">
       <div className="grid gap-5 lg:grid-cols-2">
-        <button
+        <motion.button
           type="button"
           onClick={() => navigate('/annotation/image')}
-          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 transition hover:-translate-y-0.5 hover:border-forensic-gold/50 hover:bg-forensic-gold/5"
+          className="group relative flex h-[260px] flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 transition-colors hover:border-forensic-gold/40 hover:bg-forensic-gold/[0.04]"
+          whileHover={{ y: -2 }}
+          transition={{ duration: 0.18 }}
         >
-          <ImageIcon className="h-12 w-12 text-forensic-gold" />
-          <p className="text-2xl font-semibold">图像标注</p>
-          <p className="text-sm text-forensic-stone">自动发现可疑区域</p>
-          <span className="rounded-lg bg-forensic-gold px-5 py-2 text-sm font-semibold text-graphite-950">进入</span>
-        </button>
-        <button
+          <span className="absolute left-5 top-4 font-mono text-4xl font-bold tabular-nums text-forensic-gold/30">01</span>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(184,138,68,0.15) 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(184,138,68,0.4), transparent)' }}
+          />
+          <ImageIcon className="h-12 w-12 text-forensic-gold transition-transform duration-300 group-hover:scale-110" />
+          <div className="text-center">
+            <p className="text-2xl font-semibold">图像标注</p>
+            <p className="mt-1 text-sm text-forensic-stone">自动发现可疑区域</p>
+            <p className="mt-2 font-mono text-[11px] tabular-nums text-forensic-stone/70">
+              已完成 {imageCompleted} · 待处理 {imagePending}
+            </p>
+          </div>
+          <motion.span
+            className="absolute bottom-5 right-5 rounded border border-forensic-gold/35 bg-graphite-950/60 px-3 py-1.5 font-mono text-[11px] font-semibold text-forensic-gold"
+            whileHover={{ paddingLeft: '24px', paddingRight: '24px' }}
+            transition={{ duration: 0.15 }}
+          >
+            [ ENTER → ]
+          </motion.span>
+        </motion.button>
+
+        <motion.button
           type="button"
           onClick={() => navigate('/annotation/video')}
-          className="flex h-[220px] flex-col items-center justify-center gap-4 rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 transition hover:-translate-y-0.5 hover:border-forensic-gold/50 hover:bg-forensic-gold/5"
+          className="group relative flex h-[260px] flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-forensic-olive/[0.12] bg-graphite-850 transition-colors hover:border-forensic-olive/40 hover:bg-forensic-olive/[0.04]"
+          whileHover={{ y: -2 }}
+          transition={{ duration: 0.18 }}
         >
-          <Video className="h-12 w-12 text-forensic-gold" />
-          <p className="text-2xl font-semibold">视频标注</p>
-          <p className="text-sm text-forensic-stone">定位可疑片段</p>
-          <span className="rounded-lg bg-forensic-gold px-5 py-2 text-sm font-semibold text-graphite-950">进入</span>
-        </button>
+          <span className="absolute left-5 top-4 font-mono text-4xl font-bold tabular-nums text-forensic-olive/30">02</span>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(111,143,114,0.15) 1px, transparent 1px)',
+              backgroundSize: '20px 20px',
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(111,143,114,0.4), transparent)' }}
+          />
+          <Video className="h-12 w-12 text-forensic-olive transition-transform duration-300 group-hover:scale-110" />
+          <div className="text-center">
+            <p className="text-2xl font-semibold">视频标注</p>
+            <p className="mt-1 text-sm text-forensic-stone">定位可疑片段</p>
+            <p className="mt-2 font-mono text-[11px] tabular-nums text-forensic-stone/70">
+              已完成 {videoCompleted} · 待处理 {videoPending}
+            </p>
+          </div>
+          <motion.span
+            className="absolute bottom-5 right-5 rounded border border-forensic-olive/35 bg-graphite-950/60 px-3 py-1.5 font-mono text-[11px] font-semibold text-forensic-olive"
+            whileHover={{ paddingLeft: '24px', paddingRight: '24px' }}
+            transition={{ duration: 0.15 }}
+          >
+            [ ENTER → ]
+          </motion.span>
+        </motion.button>
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[360px_1fr]">
@@ -82,9 +139,7 @@ export function AnnotationCenterPage() {
                   <p className="text-sm font-semibold">{sample.id}</p>
                   <p className="mt-1 text-xs text-forensic-stone">{TYPE_LABEL[sample.type]}</p>
                 </div>
-                <StatusBadge tone={toneForStatus(sample.annotationStatus)}>
-                  {statusLabel(sample.annotationStatus)}
-                </StatusBadge>
+                <StatusBadge tone={toneForStatus(sample.annotationStatus)}>{statusLabel(sample.annotationStatus)}</StatusBadge>
               </div>
             </div>
           ))}

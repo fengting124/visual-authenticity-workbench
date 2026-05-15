@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import type { EvidenceSample } from '../types';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
 import {
@@ -24,6 +25,7 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
       <table className="w-full border-collapse text-sm">
         <thead className="bg-graphite-850 text-xs uppercase tracking-[0.12em] text-forensic-stone">
           <tr>
+            <th className="w-0 p-0" />
             <th className="px-4 py-3 text-left">样本</th>
             <th className="px-4 py-3 text-left">类型</th>
             <th className="px-4 py-3 text-left">来源</th>
@@ -43,19 +45,36 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.03, duration: 0.2 }}
-              className={`border-t border-forensic-gold/[0.08] bg-graphite-900/80 ${
-                selectedId === sample.id ? 'outline outline-1 outline-forensic-gold/40' : ''
+              className={`group/row relative border-t border-forensic-gold/[0.08] bg-graphite-900/80 transition-colors duration-100 hover:bg-forensic-gold/[0.03] ${
+                selectedId === sample.id ? 'bg-forensic-gold/[0.04]' : ''
               }`}
             >
+              <td className="relative w-0 p-0">
+                <motion.div
+                  className="absolute inset-y-0 left-0 w-0.5 origin-center rounded-r-full bg-forensic-gold"
+                  initial={{ scaleY: 0, opacity: 0 }}
+                  animate={{
+                    scaleY: selectedId === sample.id ? 1 : 0,
+                    opacity: selectedId === sample.id ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                />
+              </td>
               <td className="px-4 py-3">
                 <button type="button" onClick={() => onSelect(sample)} className="text-left">
                   <span className="font-medium text-forensic-text">{sample.id}</span>
                   <span className="mt-1 block text-xs text-forensic-stone">{sample.title}</span>
                 </button>
               </td>
-              <td className="px-4 py-3 text-forensic-stone">{TYPE_LABEL[sample.type] ?? sample.type}</td>
-              <td className="px-4 py-3 text-forensic-stone">{SOURCE_LABEL[sample.source] ?? sample.source}</td>
-              <td className="px-4 py-3 text-forensic-stone">{sample.generator ?? '未知'}</td>
+              <td className="px-4 py-3 text-forensic-stone transition-opacity group-hover/row:text-forensic-text/80">
+                {TYPE_LABEL[sample.type] ?? sample.type}
+              </td>
+              <td className="px-4 py-3 text-forensic-stone transition-opacity group-hover/row:text-forensic-text/80">
+                {SOURCE_LABEL[sample.source] ?? sample.source}
+              </td>
+              <td className="px-4 py-3 text-forensic-stone transition-opacity group-hover/row:text-forensic-text/80">
+                {sample.generator ?? '未知'}
+              </td>
               <td className="px-4 py-3">
                 <StatusBadge tone={toneForStatus(sample.annotationStatus)}>{statusLabel(sample.annotationStatus)}</StatusBadge>
               </td>
@@ -68,13 +87,12 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
               <td className="px-4 py-3">
                 <StatusBadge tone={toneForRisk(sample.riskLevel)}>{RISK_LABEL[sample.riskLevel] ?? riskLabel(sample.riskLevel)}</StatusBadge>
               </td>
-              <td className="px-4 py-3 text-forensic-stone">{sample.createdAt}</td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3 font-mono tabular-nums text-forensic-stone transition-opacity group-hover/row:text-forensic-text/80">
+                {sample.createdAt}
+              </td>
+              <td className="relative px-4 py-3 pr-8">
                 <div className="flex gap-2 text-xs">
-                  <Link
-                    to={`/${sample.type === 'image' ? 'annotation/image' : 'annotation/video'}?sampleId=${sample.id}`}
-                    className="text-forensic-gold"
-                  >
+                  <Link to={`/${sample.type === 'image' ? 'annotation/image' : 'annotation/video'}?sampleId=${sample.id}`} className="text-forensic-gold">
                     标注
                   </Link>
                   {sample.type === 'image' && (
@@ -86,6 +104,7 @@ export function SampleTable({ samples, selectedId, onSelect }: SampleTableProps)
                     报告
                   </Link>
                 </div>
+                <ArrowRight className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 translate-x-2 text-forensic-gold/60 opacity-0 transition-all duration-150 group-hover/row:translate-x-0 group-hover/row:opacity-100" />
               </td>
             </motion.tr>
           ))}

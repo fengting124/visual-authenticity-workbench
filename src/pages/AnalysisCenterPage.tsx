@@ -7,6 +7,7 @@ import { PageShell } from '../layouts/PageShell';
 import { SectionCard } from '../shared/components/SectionCard';
 import { StatusBadge } from '../shared/components/StatusBadge';
 import { darkChartBase } from '../shared/utils/chartTheme';
+import { RISK_LABEL, toneForRisk } from '../shared/utils/format';
 
 const semanticNodes = ['全局语义', '局部区域', '逻辑一致性', '解释输出'];
 
@@ -76,7 +77,7 @@ export function AnalysisCenterPage() {
                   <p className="text-sm font-semibold">{sample.id}</p>
                   <p className="mt-1 text-xs text-forensic-stone">{sample.title}</p>
                 </div>
-                <StatusBadge tone={sample.riskScore > 70 ? 'risk' : 'warning'}>{sample.riskScore}</StatusBadge>
+                <StatusBadge tone={toneForRisk(sample.riskLevel)}>{RISK_LABEL[sample.riskLevel] ?? sample.riskLevel}</StatusBadge>
               </div>
             </div>
           ))}

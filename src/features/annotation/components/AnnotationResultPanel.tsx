@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import type { EvidenceSample, FakeRegion } from '../../samples/types';
 import { ScoreBar } from '../../../shared/components/ScoreBar';
 import { StatusBadge } from '../../../shared/components/StatusBadge';
@@ -22,6 +23,8 @@ export function AnnotationResultPanel({
   onReview,
   onSendToAnalysis,
 }: AnnotationResultPanelProps) {
+  const prefersReduced = useReducedMotion();
+
   return (
     <div className="space-y-4">
       <div>
@@ -33,6 +36,23 @@ export function AnnotationResultPanel({
         <p className="text-xs text-forensic-stone">生成提示词或推断提示词</p>
         <p className="mt-2 text-sm leading-6">{sample.prompt}</p>
       </div>
+
+      {!selectedRegion && running && (
+        <motion.div
+          className="rounded-md border border-forensic-gold/20 bg-forensic-gold/5 p-4"
+          animate={prefersReduced ? undefined : { borderColor: ['rgba(184,138,68,0.15)', 'rgba(184,138,68,0.35)', 'rgba(184,138,68,0.15)'] }}
+          transition={prefersReduced ? { duration: 0 } : { duration: 1.2, repeat: Infinity }}
+        >
+          <div className="flex items-center gap-3 text-xs text-forensic-stone">
+            <motion.div
+              className="h-2 w-2 rounded-full bg-forensic-gold"
+              animate={prefersReduced ? undefined : { scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }}
+              transition={prefersReduced ? { duration: 0 } : { duration: 0.8, repeat: Infinity }}
+            />
+            正在扫描图像，发现候选区域...
+          </div>
+        </motion.div>
+      )}
 
       {selectedRegion && (
         <div className="rounded-md border border-forensic-gold/35 bg-forensic-gold/10 p-4">

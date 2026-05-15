@@ -1,11 +1,33 @@
 export type SemanticStep = {
   id: string;
   name: string;
+  method?: string;
   status: string;
   input: string;
   result: string;
   explanation: string;
   lockedUntilPhase?: string;
+  sceneCandidates?: {
+    name: string;
+    score: number;
+    selected?: boolean;
+  }[];
+  entities?: {
+    name: string;
+    distance: number;
+    outlier: boolean;
+  }[];
+  triplets?: {
+    h: string;
+    r: string;
+    t: string;
+    kgEnergy: number;
+    llmScore: number;
+  }[];
+  alpha?: number;
+  beta?: number;
+  eKG?: number;
+  eLLM?: number;
 };
 
 export type ExpertResult = {
@@ -27,7 +49,9 @@ export type EvidenceItem = {
 export type ExpertMeterConfig = {
   phaseId: string;
   label: string;
+  method: string;
   icon: string;
   riskScore: number;
   findings: string[];
+  shapley: number;
 };

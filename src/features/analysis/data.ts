@@ -3,47 +3,71 @@ import type { EvidenceItem, ExpertMeterConfig, ExpertResult, SemanticStep } from
 export const semanticSteps: SemanticStep[] = [
   {
     id: 'global',
-    name: '全局语义理解',
+    name: '全局语义浓缩',
+    method: 'CLIP 零样本场景分类',
     lockedUntilPhase: 'semantic-chain',
     status: 'complete',
-    input: '原始图像、样本来源、推断生成提示词',
-    result: '场景主体、空间结构和光照关系被归纳为统一语义上下文。',
-    explanation: '全局阶段建立检测基线，后续区域证据会与该上下文进行一致性核验。',
+    input: '原始图像 I',
+    result: 'Q_global = 厨房 (置信度 0.87)',
+    explanation: 'CLIP 将图像编码为视觉特征,与预定义场景提示词集 T = {厨房, 客厅, 森林, ...} 计算余弦相似度,选取最高分作为全局场景基准。',
+    sceneCandidates: [
+      { name: '厨房', score: 0.87, selected: true },
+      { name: '餐厅', score: 0.42 },
+      { name: '客厅', score: 0.18 },
+      { name: '花园', score: 0.05 },
+      { name: '森林', score: 0.02 },
+    ],
   },
   {
     id: 'local',
-    name: '局部区域解析',
+    name: '全局-局部一致性校验',
+    method: 'Grounding DINO 开放词汇检测',
     lockedUntilPhase: 'expert-spatial',
     status: 'complete',
-    input: '自动标注输出的候选区域 R-01、R-02、R-03',
-    result: '反射、纹理和边界线索集中在局部过渡区域。',
-    explanation: '候选证据被转换为区域级视觉线索，供专家组按不同证据维度分析。',
+    input: 'I + Q_global',
+    result: '发现 5 个实体,2 个语义离群点',
+    explanation: '通过开放词汇目标检测提取所有显著实体,计算每个实体与全局场景向量的语义距离,超过阈值 τ=0.65 的标记为语义离群候选点。',
+    entities: [
+      { name: '锅', distance: 0.18, outlier: false },
+      { name: '青菜', distance: 0.22, outlier: false },
+      { name: '人', distance: 0.31, outlier: false },
+      { name: '塑料盆', distance: 0.78, outlier: true },
+      { name: '石头', distance: 0.84, outlier: true },
+    ],
   },
   {
     id: 'logic',
-    name: '逻辑一致性',
+    name: '双分支逻辑校验',
+    method: '知识图谱 + LLM 协同推理',
     lockedUntilPhase: 'expert-semantic',
-    status: 'review',
-    input: '空间关系、光照方向、物体边界和候选证据',
-    result: '部分区域的反射方向与可见几何关系存在冲突。',
-    explanation: '该阶段把自动标注层发现的视觉线索接入语义和物理关系核验。',
-  },
-  {
-    id: 'explain',
-    name: '解释输出',
-    lockedUntilPhase: 'complete',
     status: 'complete',
-    input: '语义链结果、专家组分数、候选证据置信度',
-    result: '样本进入高风险复核队列，建议生成结构化报告。',
-    explanation: '解释链保留从候选证据到最终判断的可追踪路径。',
+    input: '视觉三元组 ⟨h, r, t⟩',
+    result: 'P_final = Sigmoid(α · E_KG + β · E_LLM) = 0.93',
+    explanation: '一支将视觉三元组映射到 ConceptNet,计算 E_KG = ||h + r - t||²;另一支构建结构化提示词送入 LLM,输出逻辑违和度 E_LLM。可学习权重 α 和 β 加权融合。',
+    triplets: [
+      { h: '塑料盆', r: '位于上方', t: '火', kgEnergy: 0.81, llmScore: 0.92 },
+      { h: '翻炒', r: '作用于', t: '石头', kgEnergy: 0.89, llmScore: 0.95 },
+    ],
+    alpha: 0.6,
+    beta: 0.4,
+    eKG: 0.85,
+    eLLM: 0.93,
   },
 ];
 
-export const expertMeterConfigs: ExpertMeterConfig[] = [
-  { phaseId: 'expert-spatial', label: '空间专家', icon: 'SP', riskScore: 82, findings: ['透视异常', '几何畸变'] },
-  { phaseId: 'expert-frequency', label: '频域专家', icon: 'FQ', riskScore: 76, findings: ['高频噪声', '频谱异常'] },
-  { phaseId: 'expert-style', label: '风格专家', icon: 'ST', riskScore: 68, findings: ['材质偏移', '风格断裂'] },
-  { phaseId: 'expert-semantic', label: '语义专家', icon: 'SM', riskScore: 89, findings: ['逻辑矛盾', '语义断裂'] },
+export const genericExpertConfigs: ExpertMeterConfig[] = [
+  { phaseId: 'expert-spatial', label: '空域专家', method: '多尺度 CNN', icon: 'SP', riskScore: 82, findings: ['几何畸变', '透视异常'], shapley: 0.28 },
+  { phaseId: 'expert-frequency', label: '频域专家', method: 'FFT 频谱分析', icon: 'FQ', riskScore: 76, findings: ['高频残留', '频谱异常'], shapley: 0.19 },
+  { phaseId: 'expert-style', label: '风格专家', method: '可学习风格矩阵', icon: 'ST', riskScore: 68, findings: ['材质偏移', '风格断裂'], shapley: 0.14 },
+  { phaseId: 'expert-semantic', label: '语义专家', method: 'CLIP 语义对齐', icon: 'SM', riskScore: 89, findings: ['逻辑矛盾', '语义断裂'], shapley: 0.22 },
+];
+
+export const targetedExpertConfigs = [
+  { id: 'nano-banana-pro', label: 'Nano Banana Pro', adapter: 'LoRA · r=8', activated: true, gateScore: 0.82, shapley: 0.11, year: 2025 },
+  { id: 'hunyuan-image', label: 'HunyuanImage 3.0', adapter: 'LoRA · r=8', activated: true, gateScore: 0.64, shapley: 0.06, year: 2025 },
+  { id: 'sd-35', label: 'Stable Diffusion 3.5', adapter: 'LoRA · r=4', activated: false, gateScore: 0.21, shapley: 0, year: 2025 },
+  { id: 'gpt-image-15', label: 'GPT Image 1.5', adapter: 'LoRA · r=4', activated: false, gateScore: 0.18, shapley: 0, year: 2025 },
+  { id: 'imagen3', label: 'Imagen 3', adapter: 'LoRA · r=4', activated: false, gateScore: 0.12, shapley: 0, year: 2024 },
 ];
 
 export const fusionEvidenceChips = ['边界异常', '透视畸变', '纹理断裂', '语义矛盾'];

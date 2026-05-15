@@ -43,13 +43,21 @@ export function SampleCard({ sample, selected, onSelect }: SampleCardProps) {
           <ScanSearch className="h-3.5 w-3.5" />
           标注
         </Link>
-        <Link
-          to={`/analysis/sample?sampleId=${sample.id}`}
-          className="inline-flex items-center justify-center gap-1 rounded border border-forensic-gold/[0.08] px-2 py-2 text-xs text-forensic-stone"
-        >
-          <Microscope className="h-3.5 w-3.5" />
-          分析
-        </Link>
+        {sample.type === 'image' && (
+          <Link
+            to={`/analysis/sample?sampleId=${sample.id}`}
+            className="inline-flex items-center justify-center gap-1 rounded border border-forensic-gold/[0.08] px-2 py-2 text-xs text-forensic-stone"
+          >
+            <Microscope className="h-3.5 w-3.5" />
+            分析
+          </Link>
+        )}
+        {sample.type !== 'image' && (
+          <span className="inline-flex cursor-not-allowed select-none items-center justify-center gap-1 rounded border border-forensic-gold/[0.04] px-2 py-2 text-xs text-forensic-stone/30">
+            <Microscope className="h-3.5 w-3.5" />
+            分析
+          </span>
+        )}
         <Link to={`/report?sampleId=${sample.id}`} className="inline-flex items-center justify-center gap-1 rounded border border-forensic-gold/[0.08] px-2 py-2 text-xs text-forensic-stone">
           <FileText className="h-3.5 w-3.5" />
           报告

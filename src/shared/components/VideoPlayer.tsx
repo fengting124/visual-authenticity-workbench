@@ -2,9 +2,10 @@ import { Play, ScanLine } from 'lucide-react';
 
 type VideoPlayerProps = {
   src?: string | null;
+  onLoadedMetadata?: (duration: number) => void;
 };
 
-export function VideoPlayer({ src }: VideoPlayerProps) {
+export function VideoPlayer({ src, onLoadedMetadata }: VideoPlayerProps) {
   return (
     <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-graphite-900">
       <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(#2d3338_1px,transparent_1px),linear-gradient(90deg,#2d3338_1px,transparent_1px)] [background-size:32px_32px]" />
@@ -13,7 +14,12 @@ export function VideoPlayer({ src }: VideoPlayerProps) {
         本地视频样本
       </div>
       {src ? (
-        <video src={src} controls className="relative h-full w-full object-contain" />
+        <video
+          src={src}
+          controls
+          onLoadedMetadata={(event) => onLoadedMetadata?.(event.currentTarget.duration)}
+          className="relative h-full w-full object-contain"
+        />
       ) : (
         <button
           type="button"

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 import { formatPercent } from '../utils/format';
 
@@ -19,10 +20,17 @@ export function ScoreBar({ label, value, tone = 'gold' }: ScoreBarProps) {
     <div>
       <div className="mb-2 flex items-center justify-between text-xs text-forensic-stone">
         <span>{label}</span>
-        <span className="tabular-nums">{formatPercent(value)}</span>
+        <motion.span className="tabular-nums" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          {formatPercent(value)}
+        </motion.span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-graphite-800">
-        <div className={cn('h-full rounded-full', toneClass[tone])} style={{ width: `${value}%` }} />
+        <motion.div
+          className={cn('h-full rounded-full', toneClass[tone])}
+          initial={{ width: '0%' }}
+          animate={{ width: `${value}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+        />
       </div>
     </div>
   );

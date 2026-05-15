@@ -85,6 +85,10 @@ export const PHASE_CONFIGS: PhaseConfig[] = [
     label: '证据融合判断',
     durationMs: 1000,
     logLines: [
+      '[GATE] 计算专用专家门控亲和度',
+      '[GATE] Nano Banana Pro · 亲和度 0.82 → 激活',
+      '[GATE] HunyuanImage 3.0 · 亲和度 0.64 → 激活',
+      '[GATE] 其余靶向专家 · 亲和度 < 0.5 → 休眠',
       '[FUSE] 贝叶斯证据融合启动',
       '[FUSE] 专家权重归一化完成',
       '[FUSE] 最终置信度计算中...',

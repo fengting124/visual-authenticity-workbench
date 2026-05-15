@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { cn } from '../utils/cn';
 
@@ -17,14 +18,31 @@ const toneClass: Record<NonNullable<StatusBadgeProps['tone']>, string> = {
 };
 
 export function StatusBadge({ children, tone = 'neutral', className }: StatusBadgeProps) {
+  const prefersReduced = useReducedMotion();
+  const childStr = typeof children === 'string' ? children : '';
+  const isActive =
+    tone === 'warning' &&
+    (childStr.includes('处理中') || childStr.includes('分析中') || childStr.includes('待复核') || childStr.includes('运行中'));
+  const isRunning = tone === 'warning' && childStr.includes('处理中');
+
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium tabular-nums',
+        'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium tabular-nums',
         toneClass[tone],
         className,
       )}
     >
+      {isActive && (
+        <motion.span
+          className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+          style={{
+            backgroundColor: '#D2A64A',
+          }}
+          animate={isRunning && !prefersReduced ? { opacity: [1, 0.3, 1], scale: [1, 1.3, 1] } : { opacity: 1 }}
+          transition={isRunning && !prefersReduced ? { duration: 1, repeat: Infinity } : { duration: 0 }}
+        />
+      )}
       {children}
     </span>
   );
