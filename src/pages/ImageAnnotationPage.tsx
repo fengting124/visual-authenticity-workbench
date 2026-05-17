@@ -137,6 +137,7 @@ export function ImageAnnotationPage() {
               title={meta.title}
               subtitle={meta.subtitle}
               status={status}
+              showConnector={index < STAGE_META.length - 1}
             >
               <StageComponent isActive={status === 'active'} isComplete={status === 'complete'} />
             </ReverseChainStage>

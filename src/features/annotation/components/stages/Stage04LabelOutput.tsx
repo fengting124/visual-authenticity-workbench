@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { demoReverseChain } from '../../data/reverseChain';
 
 type Props = { isActive: boolean; isComplete: boolean };
@@ -5,6 +7,7 @@ type Props = { isActive: boolean; isComplete: boolean };
 export function Stage04LabelOutput({ isActive, isComplete }: Props) {
   const data = demoReverseChain.stage04_labels;
   const showContent = isActive || isComplete;
+  const [jsonExpanded, setJsonExpanded] = useState(true);
 
   if (!showContent) {
     return <p className="text-xs text-forensic-stone/40">等待启动 · 阶段尚未执行</p>;
@@ -48,28 +51,39 @@ export function Stage04LabelOutput({ isActive, isComplete }: Props) {
           </div>
         ))}
       </div>
-      <div className="rounded border border-forensic-gold/15 bg-graphite-950 p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-forensic-gold">
-            EVIDENCE JSON · {data.evidence_id}
-          </p>
+
+      <div className="rounded border border-forensic-gold/15 bg-graphite-950">
+        <button
+          type="button"
+          onClick={() => setJsonExpanded(!jsonExpanded)}
+          className="flex w-full items-center justify-between px-3 py-2 transition-colors hover:bg-graphite-900"
+        >
+          <div className="flex items-center gap-2">
+            {jsonExpanded ? (
+              <ChevronDown className="h-3 w-3 text-forensic-gold" />
+            ) : (
+              <ChevronRight className="h-3 w-3 text-forensic-gold" />
+            )}
+            <p className="font-mono text-[10px] uppercase tracking-widest text-forensic-gold">
+              EVIDENCE JSON · {data.evidence_id}
+            </p>
+          </div>
           <span className="font-mono text-[9px] text-forensic-stone/60">{data.media_type}</span>
-        </div>
-        <pre className="overflow-x-auto font-mono text-[10px] leading-relaxed text-forensic-stone">
-          {JSON.stringify(
-            {
-              L1_global: data.L1_global,
-              L2_local: data.L2_local,
-              L3_semantic: {
-                ...data.L3_semantic,
-                knowledge_graph_conflicts: data.L3_semantic.knowledge_graph_conflicts.slice(0, 1),
+        </button>
+        {jsonExpanded && (
+          <pre className="overflow-x-auto px-3 pb-3 font-mono text-[10px] leading-relaxed text-forensic-stone">
+            {JSON.stringify(
+              {
+                L1_global: data.L1_global,
+                L2_local: data.L2_local,
+                L3_semantic: data.L3_semantic,
+                L4_chain: data.L4_chain,
               },
-              L4_chain: data.L4_chain,
-            },
-            null,
-            2,
-          )}
-        </pre>
+              null,
+              2,
+            )}
+          </pre>
+        )}
       </div>
     </div>
   );
