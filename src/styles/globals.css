@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color: #F3F0EA;
+  color: #f3f0ea;
   background: #111315;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -66,7 +66,7 @@ select {
 /* Refined text selection */
 ::selection {
   background: rgba(184, 138, 68, 0.22);
-  color: #F3F0EA;
+  color: #f3f0ea;
 }
 
 .forensic-noise {
@@ -79,7 +79,7 @@ select {
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
   opacity: 0.35;
-  pointer-events: none;
+  pointer-events: auto;
   border-radius: inherit;
   z-index: 0;
 }
@@ -100,4 +100,177 @@ select {
     animation: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ============================================
+   VeriLoop · 取证档案风 全局样式扩展
+   ============================================ */
+
+/* 1. 档案网格纸背景工具类 */
+.archive-grid {
+  position: relative;
+  background-color: #131517;
+  background-image:
+    linear-gradient(rgba(184, 138, 68, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 138, 68, 0.09) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+/* 2. 档案纸纹理(更细密的网格 + 微噪点) */
+.archive-paper {
+  background-color: #1c1e20;
+  background-image:
+    linear-gradient(rgba(184, 138, 68, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 138, 68, 0.045) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-size:
+    18px 18px,
+    18px 18px,
+    200px 200px;
+}
+
+/* 3. 红色印章戳记 */
+.stamp-classified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 14px;
+  border: 2px solid #a64545;
+  color: #a64545;
+  font-family: 'Crimson Pro', serif;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  text-transform: uppercase;
+  background: rgba(166, 69, 69, 0.05);
+  position: relative;
+  transform: rotate(-4deg);
+  opacity: 0.92;
+}
+
+.stamp-classified::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid #a64545;
+  opacity: 0.4;
+  border-radius: 2px;
+}
+
+/* 4. 手写批注样式 */
+.handwritten {
+  font-family: 'Caveat', cursive;
+  color: #a64545;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  transform: rotate(-1.5deg);
+  display: inline-block;
+}
+
+.handwritten-blue {
+  font-family: 'Caveat', cursive;
+  color: #3f5e7e;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  transform: rotate(-1.5deg);
+  display: inline-block;
+}
+
+/* 5. 物证编号样式 */
+.exhibit-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  background: #c9a66b;
+  color: #1c1e20;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 6. 装订孔(用于证据图片左侧) */
+.binding-holes {
+  position: relative;
+}
+
+.binding-holes::before,
+.binding-holes::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #111315;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.binding-holes::before {
+  top: 18%;
+}
+
+.binding-holes::after {
+  bottom: 18%;
+}
+
+/* 7. 档案夹色标条(页面顶部细条) */
+.folder-tab-strip {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #b88a44 0%,
+    #b88a44 20%,
+    #6f8f72 20%,
+    #6f8f72 40%,
+    #a64545 40%,
+    #a64545 60%,
+    #c9a66b 60%,
+    #c9a66b 80%,
+    #3f5e7e 80%,
+    #3f5e7e 100%
+  );
+}
+
+/* 8. 取证元数据水印(右下角) */
+.forensic-watermark {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 5;
+  padding: 5px 8px;
+  background: rgba(17, 19, 21, 0.65);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(184, 138, 68, 0.08);
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  line-height: 1.5;
+  color: rgba(168, 162, 154, 0.35);
+  pointer-events: none;
+  letter-spacing: 0.04em;
+  max-width: 220px;
+  transition: opacity 0.3s ease;
+}
+
+.forensic-watermark:hover {
+  opacity: 0.92;
+  color: rgba(168, 162, 154, 0.75);
+}
+
+.forensic-watermark strong {
+  color: rgba(184, 138, 68, 0.55);
+  font-weight: 600;
+  margin-right: 4px;
+  font-size: 8px;
+}
+
+/* 默认状态半透明,鼠标移到附近时才显眼 */
+.forensic-watermark {
+  opacity: 0.28;
 }

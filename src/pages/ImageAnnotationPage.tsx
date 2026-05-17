@@ -1,201 +1,148 @@
-import { ChangeEvent, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { activeSample, samples } from '../features/samples/data';
-import { findImportedSample } from '../features/samples/importedSamples';
-import { AnnotationLogStream } from '../features/annotation/components/AnnotationLogStream';
-import { AnnotationResultPanel } from '../features/annotation/components/AnnotationResultPanel';
-import { ImageAnnotationCanvas } from '../features/annotation/components/ImageAnnotationCanvas';
-import { RegionClueList } from '../features/annotation/components/RegionClueList';
+import { useEffect, useState } from 'react';
+import { Play, RotateCcw } from 'lucide-react';
 import { PageShell } from '../layouts/PageShell';
-import { PipelineStatusBar } from '../shared/components/PipelineStatusBar';
-import { SectionCard } from '../shared/components/SectionCard';
-import { readFileAsDataUrl, readLocalAsset, saveAnnotationToSession, saveLocalAsset } from '../shared/utils/localSample';
+import {
+  ReverseChainStage,
+  type StageStatus,
+} from '../features/annotation/components/ReverseChainStage';
+import { Stage01SemanticInversion } from '../features/annotation/components/stages/Stage01SemanticInversion';
+import { Stage02TargetSelection } from '../features/annotation/components/stages/Stage02TargetSelection';
+import { Stage03TamperingExecution } from '../features/annotation/components/stages/Stage03TamperingExecution';
+import { Stage04LabelOutput } from '../features/annotation/components/stages/Stage04LabelOutput';
+import { Stage05QualityAudit } from '../features/annotation/components/stages/Stage05QualityAudit';
+import { demoReverseChain } from '../features/annotation/data/reverseChain';
 
-const IMAGE_ANNOTATION_STAGES = [
-  {
-    title: '图像读取',
-    output: '建立图像任务上下文',
-    durationMs: 700,
-    logLines: ['[INIT] 图像解码器就绪', '[INFO] 色彩空间: sRGB', '[INFO] 分辨率读取完成'],
-  },
-  {
-    title: '区域扫描',
-    output: '发现候选可疑区域',
-    durationMs: 1400,
-    logLines: ['[SCAN] 启动多尺度网格扫描', '[SCAN] 层级 1/3: 低频异常检测', '[SCAN] 层级 2/3: 纹理一致性核查', '[SCAN] 层级 3/3: 边界语义分析', '[WARN] 检测到候选异常区域'],
-  },
-  {
-    title: '线索生成',
-    output: '输出反射、纹理、边界线索',
-    durationMs: 900,
-    logLines: ['[CLUE] 区域 R-01: 反射不一致 → 置信度 82%', '[CLUE] 区域 R-02: 纹理断裂 → 置信度 74%', '[CLUE] 区域 R-03: 边界异常 → 置信度 68%'],
-  },
-  {
-    title: '结果固化',
-    output: '写入候选证据队列',
-    durationMs: 500,
-    logLines: ['[SAVE] 写入候选证据数据库', '[OK]   标注任务完成，等待复核'],
-  },
-] as const;
+const STAGE_DURATIONS = [2500, 2200, 3000, 2500, 2200];
+
+const STAGE_META = [
+  { title: '语义反推', subtitle: 'BLIP-2 + CLIP + Grounding DINO' },
+  { title: '篡改目标选择', subtitle: 'SAM + 价值评估' },
+  { title: '篡改执行', subtitle: 'Multi-Generator Inpainting' },
+  { title: '四层标签产出', subtitle: 'L1 / L2 / L3 / L4 Auto-Labeling' },
+  { title: '质量自检与归档', subtitle: 'Difficulty Audit + Evolution Alert' },
+];
+
+const STAGE_COMPONENTS = [
+  Stage01SemanticInversion,
+  Stage02TargetSelection,
+  Stage03TamperingExecution,
+  Stage04LabelOutput,
+  Stage05QualityAudit,
+];
 
 export function ImageAnnotationPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const sampleId = searchParams.get('sampleId') ?? activeSample.id;
-  const importedSample = findImportedSample(sampleId);
-  const sample =
-    importedSample?.type === 'image'
-      ? importedSample
-      : samples.find((item) => item.id === sampleId && item.type === 'image') ?? activeSample;
-
-  const [selectedRegionId, setSelectedRegionId] = useState(sample.regions[0]?.id ?? '');
   const [running, setRunning] = useState(false);
-  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
-  const reviewed = reviewedIds.has(selectedRegionId);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [complete, setComplete] = useState(false);
-  const [annotationLogLines, setAnnotationLogLines] = useState<string[]>([]);
-  const [localImage, setLocalImage] = useState(() => {
-    const stored = readLocalAsset('image');
-    return {
-      dataUrl: stored.dataUrl ?? sample.assetSrc ?? null,
-      name: stored.name ?? 'fake.jpg',
-    };
-  });
+  const [currentStage, setCurrentStage] = useState(-1);
+  const [completedStages, setCompletedStages] = useState<Set<number>>(new Set());
 
-  const selectedRegion = useMemo(
-    () => sample.regions.find((region) => region.id === selectedRegionId) ?? sample.regions[0],
-    [sample.regions, selectedRegionId],
-  );
-
-  const visibleRegionCount = complete || activeIndex >= 3 ? sample.regions.length : activeIndex >= 2 ? sample.regions.length : 0;
-  const annotationPhase = running ? activeIndex : complete ? 3 : -1;
-
-  function runAnnotation() {
+  function startPipeline() {
     setRunning(true);
-    setComplete(false);
-    setActiveIndex(0);
-    setAnnotationLogLines([]);
-
-    let elapsed = 0;
-    IMAGE_ANNOTATION_STAGES.forEach((stage, stageIndex) => {
-      window.setTimeout(() => {
-        setActiveIndex(stageIndex);
-        if (stageIndex === IMAGE_ANNOTATION_STAGES.length - 1) {
-          window.setTimeout(() => {
-            setRunning(false);
-            setComplete(true);
-          }, stage.durationMs);
-        }
-      }, elapsed);
-
-      const lineInterval = stage.durationMs / (stage.logLines.length + 1);
-      stage.logLines.forEach((line, lineIndex) => {
-        window.setTimeout(() => {
-          setAnnotationLogLines((prev) => [...prev, line]);
-        }, elapsed + lineInterval * (lineIndex + 1));
-      });
-
-      elapsed += stage.durationMs;
-    });
+    setCurrentStage(0);
+    setCompletedStages(new Set());
   }
 
-  function sendToAnalysis() {
-    saveAnnotationToSession(sample.id, sample.regions);
-    navigate(`/analysis/sample?sampleId=${sample.id}`);
+  function resetPipeline() {
+    setRunning(false);
+    setCurrentStage(-1);
+    setCompletedStages(new Set());
   }
 
-  function handleImage(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    readFileAsDataUrl(file, (dataUrl) => {
-      saveLocalAsset('image', dataUrl, file.name);
-      setLocalImage({ dataUrl, name: file.name });
-    });
-  }
+  useEffect(() => {
+    if (!running || currentStage < 0 || currentStage >= STAGE_DURATIONS.length) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setCompletedStages((prev) => new Set([...prev, currentStage]));
+      if (currentStage < STAGE_DURATIONS.length - 1) {
+        setCurrentStage(currentStage + 1);
+      } else {
+        setRunning(false);
+      }
+    }, STAGE_DURATIONS[currentStage]);
+
+    return () => window.clearTimeout(timer);
+  }, [running, currentStage]);
+
+  const getStatus = (index: number): StageStatus => {
+    if (completedStages.has(index)) return 'complete';
+    if (currentStage === index && running) return 'active';
+    return 'idle';
+  };
+
+  const allComplete = completedStages.size === STAGE_DURATIONS.length;
 
   return (
-    <PageShell eyebrow="图像标注" title="图像证据发现" description="">
-      <PipelineStatusBar steps={['读取', '扫描', '生成', '固化']} currentStep={activeIndex} complete={complete} />
-
-      <SectionCard title="图像输入" eyebrow={sample.id} className="mt-5">
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-forensic-gold/[0.08] bg-graphite-900 px-4 py-3 text-xs">
-          <span className="min-w-0 flex-1 truncate font-mono tabular-nums text-forensic-stone">{localImage.name}</span>
-          <label className="cursor-pointer rounded-md border border-forensic-gold/[0.08] bg-graphite-850 px-3 py-2 text-forensic-stone transition-colors hover:border-forensic-gold/30 hover:text-forensic-text">
-            选择文件
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImage}
-              className="hidden"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={runAnnotation}
-            className="rounded-md border border-forensic-gold/40 bg-forensic-gold/10 px-4 py-2 font-medium text-forensic-gold disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={running}
-          >
-            {running ? '正在标注' : '开始标注'}
-          </button>
-          <div className="flex min-w-[260px] items-center gap-3 border-l border-forensic-gold/[0.08] pl-3">
-            <span className="text-forensic-stone">当前阶段</span>
-            <motion.span
-              key={activeIndex}
-              className="font-medium text-forensic-gold"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {running
-                ? IMAGE_ANNOTATION_STAGES[activeIndex]?.title ?? '准备中'
-                : complete
-                  ? '✓ ' + IMAGE_ANNOTATION_STAGES[IMAGE_ANNOTATION_STAGES.length - 1].title
-                  : '就绪'}
-            </motion.span>
-            {running && <span className="ml-auto text-forensic-stone">{IMAGE_ANNOTATION_STAGES[activeIndex]?.output}</span>}
+    <PageShell
+      eyebrow="图像反向生成链路标注"
+      title="自动产出四层证据链标签"
+      description="用反向生成链路造出带四层标签的合成样本,为检测端提供可解释训练数据"
+    >
+      <div className="mb-5 flex items-center justify-between gap-4 rounded-lg border border-forensic-gold/[0.18] bg-graphite-900 px-5 py-3 shadow-archive-card">
+        <div className="flex items-center gap-4">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-forensic-stone/60">
+              输入素材
+            </p>
+            <p className="mt-0.5 font-mono text-sm text-forensic-text">
+              {demoReverseChain.sourceImage.name}
+            </p>
+          </div>
+          <div className="border-l border-forensic-gold/15 pl-4">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-forensic-stone/60">
+              分辨率
+            </p>
+            <p className="mt-0.5 font-mono text-sm text-forensic-text">
+              {demoReverseChain.sourceImage.resolution}
+            </p>
+          </div>
+          <div className="border-l border-forensic-gold/15 pl-4">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-forensic-stone/60">
+              进度
+            </p>
+            <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-forensic-gold">
+              {completedStages.size} / 5
+            </p>
           </div>
         </div>
-      </SectionCard>
-
-      <div className="grid gap-5 lg:grid-cols-[55fr_45fr]">
-        <SectionCard title="图像画布" eyebrow="候选区域">
-          <div className="space-y-4">
-            <ImageAnnotationCanvas
-              sample={sample}
-              selectedRegionId={selectedRegionId}
-              onSelectRegion={setSelectedRegionId}
-              imageSrc={localImage.dataUrl}
-              annotationPhase={annotationPhase}
-              isRunning={running}
-              isComplete={complete}
-            />
-            <AnnotationLogStream lines={annotationLogLines} isRunning={running} isComplete={complete} />
-          </div>
-        </SectionCard>
-        <SectionCard title="标注结果面板" eyebrow="结构化输出">
-          <AnnotationResultPanel
-            sample={sample}
-            selectedRegion={visibleRegionCount > 0 ? selectedRegion : undefined}
-            running={running}
-            reviewed={reviewed}
-            onRun={runAnnotation}
-            onReview={() => setReviewedIds((prev) => new Set([...prev, selectedRegionId]))}
-            onSendToAnalysis={sendToAnalysis}
-          />
-        </SectionCard>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={startPipeline}
+            disabled={running}
+            className="inline-flex items-center gap-2 rounded border border-forensic-gold/40 bg-forensic-gold/10 px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-forensic-gold transition-colors hover:bg-forensic-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Play className="h-3.5 w-3.5" />
+            {running ? '执行中' : allComplete ? '重新执行' : '启动链路'}
+          </button>
+          <button
+            type="button"
+            onClick={resetPipeline}
+            className="inline-flex items-center gap-2 rounded border border-forensic-gold/[0.08] bg-graphite-850 px-4 py-2 font-mono text-xs uppercase tracking-widest text-forensic-stone transition-colors hover:border-forensic-gold/25"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            重置
+          </button>
+        </div>
       </div>
 
-      <SectionCard title="候选证据列表" className="mt-5">
-        <RegionClueList
-          regions={sample.regions}
-          selectedId={selectedRegionId}
-          onSelect={setSelectedRegionId}
-          visibleCount={visibleRegionCount}
-          isRunning={running}
-        />
-      </SectionCard>
+      <div className="space-y-4">
+        {STAGE_META.map((meta, index) => {
+          const status = getStatus(index);
+          const stageNumber = index + 1;
+          const StageComponent = STAGE_COMPONENTS[index];
+
+          return (
+            <ReverseChainStage
+              key={stageNumber}
+              index={stageNumber}
+              title={meta.title}
+              subtitle={meta.subtitle}
+              status={status}
+            >
+              <StageComponent isActive={status === 'active'} isComplete={status === 'complete'} />
+            </ReverseChainStage>
+          );
+        })}
+      </div>
     </PageShell>
   );
 }

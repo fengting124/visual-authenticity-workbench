@@ -53,20 +53,55 @@ export function Sidebar() {
             viewBox="0 0 32 32"
             className="h-4 w-4 text-forensic-gold"
             animate={prefersReduced ? undefined : { rotate: 360 }}
-            transition={prefersReduced ? { duration: 0 } : { duration: 12, repeat: Infinity, ease: 'linear' }}
+            transition={
+              prefersReduced ? { duration: 0 } : { duration: 12, repeat: Infinity, ease: 'linear' }
+            }
             aria-hidden="true"
           >
-            <circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.75" />
-            <circle cx="16" cy="16" r="5.5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.45" />
-            <path d="M16 3.5v6M16 22.5v6M3.5 16h6M22.5 16h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            <circle
+              cx="16"
+              cy="16"
+              r="11"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              opacity="0.75"
+            />
+            <circle
+              cx="16"
+              cy="16"
+              r="5.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+              opacity="0.45"
+            />
+            <path
+              d="M16 3.5v6M16 22.5v6M3.5 16h6M22.5 16h6"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
             <circle cx="16" cy="16" r="1.6" fill="currentColor" />
           </motion.svg>
-          <p className="text-xs uppercase tracking-[0.22em] text-forensic-gold">Evidence</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-forensic-gold">
+            EVIDENCE LOOP
+          </p>
         </div>
-        <h1 className="mt-2 text-lg font-semibold leading-tight text-forensic-text">视觉证据工作台</h1>
+        <h1 className="mt-2 font-serif text-xl font-bold leading-tight tracking-tight text-forensic-text">
+          VeriLoop
+        </h1>
+        <p className="mt-0.5 text-[10px] leading-tight text-forensic-stone/50">
+          取证证据链平台 · v0.9
+        </p>
       </div>
 
-      <motion.nav className="flex-1 space-y-1 p-3" variants={navVariants} initial="hidden" animate="visible">
+      <motion.nav
+        className="flex-1 space-y-1 p-3"
+        variants={navVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {navItems.map((item) => {
           if ('divider' in item) {
             return <div key={item.id} className="my-3 h-px bg-forensic-gold/10" />;
@@ -74,7 +109,8 @@ export function Sidebar() {
 
           const Icon = item.icon;
           const isExactMatch = location.pathname === item.path;
-          const isParentOfActiveSub = !item.sub && item.path !== '/' && location.pathname.startsWith(item.path + '/');
+          const isParentOfActiveSub =
+            !item.sub && item.path !== '/' && location.pathname.startsWith(item.path + '/');
           const isActive = isExactMatch || isParentOfActiveSub;
 
           return (
@@ -123,7 +159,9 @@ export function Sidebar() {
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-forensic-gold" />
             <span className="text-forensic-stone/50">QUEUE</span>
-            <span className="ml-auto tabular-nums text-forensic-gold">{sampleMetrics.reviewRequired}</span>
+            <span className="ml-auto tabular-nums text-forensic-gold">
+              {sampleMetrics.reviewRequired}
+            </span>
           </div>
         </div>
       </div>

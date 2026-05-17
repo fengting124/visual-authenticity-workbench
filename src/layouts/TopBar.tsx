@@ -18,11 +18,13 @@ const ROUTE_LABELS: Record<string, string> = {
 function LiveClock() {
   const formatTime = () => {
     const now = new Date();
-    const date = now.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).replace(/\//g, '-');
+    const date = now
+      .toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\//g, '-');
     const time = now.toLocaleTimeString('zh-CN', { hour12: false });
     return `WS-001 · ${date} ${time}`;
   };
@@ -56,11 +58,20 @@ export function TopBar() {
       }}
     >
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-forensic-stone/60">视觉真实性工作台</span>
+        <span className="font-serif text-base font-bold tracking-tight text-forensic-gold">
+          VeriLoop
+        </span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-forensic-stone/40">
+          FORENSIC SYSTEM
+        </span>
+        <span className="mx-2 h-3 w-px bg-forensic-gold/20" />
+        <span className="text-forensic-stone/60">证据工作台</span>
         <ChevronRight className="h-3.5 w-3.5 text-forensic-stone/35" />
         <span className="font-medium text-forensic-text">{routeLabel}</span>
         <ChevronRight className="h-3.5 w-3.5 text-forensic-stone/35" />
-        <span className="font-mono text-xs tabular-nums text-forensic-gold">{currentSample.id}</span>
+        <span className="font-mono text-xs tabular-nums text-forensic-gold">
+          {currentSample.id}
+        </span>
       </div>
       <div className="flex items-center gap-4 text-xs text-forensic-stone">
         <div className="flex items-center gap-1.5">

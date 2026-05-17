@@ -59,8 +59,22 @@ function Sparkline({ values }: { values: number[] }) {
 
   return (
     <svg viewBox="0 0 120 48" className="h-12 w-28 overflow-visible">
-      <polyline fill="none" stroke="rgba(184,138,68,0.22)" strokeWidth="5" points={points} strokeLinecap="round" strokeLinejoin="round" />
-      <polyline fill="none" stroke="#B88A44" strokeWidth="1.8" points={points} strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        fill="none"
+        stroke="rgba(184,138,68,0.22)"
+        strokeWidth="5"
+        points={points}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <polyline
+        fill="none"
+        stroke="#B88A44"
+        strokeWidth="1.8"
+        points={points}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -83,7 +97,12 @@ function AnimatedStatCard({
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-6 transition-colors hover:border-forensic-gold/20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(184,138,68,0.2), transparent)' }} />
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(184,138,68,0.2), transparent)',
+        }}
+      />
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-5xl font-bold tabular-nums text-forensic-gold">
@@ -99,10 +118,25 @@ function AnimatedStatCard({
   );
 }
 
-function StatCard({ value, label, note, values }: { value: string; label: string; note: string; values: number[] }) {
+function StatCard({
+  value,
+  label,
+  note,
+  values,
+}: {
+  value: string;
+  label: string;
+  note: string;
+  values: number[];
+}) {
   return (
     <div className="group relative overflow-hidden rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-6 transition-colors hover:border-forensic-gold/20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(184,138,68,0.2), transparent)' }} />
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(184,138,68,0.2), transparent)',
+        }}
+      />
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-mono text-5xl font-bold tabular-nums text-forensic-gold">{value}</p>
@@ -140,21 +174,42 @@ export function OverviewPage() {
 
   return (
     <>
-      <section className="forensic-noise relative overflow-hidden rounded-2xl border border-forensic-gold/[0.08] bg-graphite-950 px-8 py-10 shadow-workstation">
+      <section className="forensic-noise relative overflow-hidden rounded-2xl border border-forensic-gold/[0.18] bg-graphite-900 px-8 py-10 shadow-workstation">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-forensic-gold/40 to-transparent" />
         <div className="grid items-center gap-8 lg:grid-cols-[60fr_40fr]">
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-forensic-gold/25 bg-forensic-gold/5 px-3 py-1">
-              <span className="relative flex h-2 w-2 items-center justify-center">
-                <span className={`absolute h-2 w-2 rounded-full border border-forensic-gold ${prefersReduced ? '' : 'animate-pulse-ring'}`} />
-                <span className="h-1.5 w-1.5 rounded-full bg-forensic-gold" />
+            <div className="flex flex-wrap items-center gap-3">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-[1px] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em]"
+                style={{
+                  background: '#C9A66B',
+                  color: '#1C1E20',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                }}
+              >
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ background: '#1C1E20', opacity: 0.5 }}
+                />
+                CASE FILE · VL-2026-001
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-forensic-gold">FORENSIC INTELLIGENCE · v0.9</span>
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.16em] text-forensic-stone/60">
+                <span className="relative flex h-2 w-2 items-center justify-center">
+                  <span className="absolute h-2 w-2 rounded-full border border-forensic-olive animate-pulse-ring" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-forensic-olive" />
+                </span>
+                SYSTEM ONLINE · v0.9
+              </span>
             </div>
 
             <div className="mt-6">
-              <h1 className="text-6xl font-semibold leading-[1.05] tracking-tight text-forensic-text">洞察 AI 生成内容</h1>
-              <h2 className="mt-2 text-6xl font-semibold leading-[1.05] tracking-tight">
-                <span className={`bg-gradient-to-r from-forensic-gold via-forensic-text to-forensic-gold bg-[length:200%_100%] bg-clip-text text-transparent ${prefersReduced ? '' : 'animate-shimmer'}`}>
+              <h1 className="font-serif text-6xl font-semibold leading-[1.05] tracking-tight text-forensic-text">
+                洞察 AI 生成内容
+              </h1>
+              <h2 className="mt-2 font-serif text-6xl font-semibold leading-[1.05] tracking-tight">
+                <span
+                  className={`bg-gradient-to-r from-forensic-gold via-forensic-text to-forensic-gold bg-[length:200%_100%] bg-clip-text text-transparent ${prefersReduced ? '' : 'animate-shimmer'}`}
+                >
                   隐藏的证据链
                 </span>
               </h2>
@@ -204,19 +259,27 @@ export function OverviewPage() {
       <section className="mt-2">
         <div className="relative grid gap-5 lg:grid-cols-2">
           <div className="relative h-[280px] overflow-hidden rounded-xl border-2 border-forensic-olive bg-graphite-950">
-            <img src="/demo-assets/real.jpg" alt="真实图像" className="h-full w-full object-cover" />
-            <div className="absolute bottom-4 left-4 rounded-lg border border-forensic-olive/30 bg-forensic-olive/15 px-3 py-2 text-sm text-forensic-olive">
-              真实图像 · 置信度 96%
+            <img
+              src="/demo-assets/real.jpg"
+              alt="真实图像"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded border border-forensic-olive/60 bg-graphite-950/85 px-3 py-2 text-sm backdrop-blur">
+              <span className="inline-flex items-center gap-1 rounded-sm bg-forensic-olive/20 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-forensic-olive">
+                <span className="h-1 w-1 rounded-full bg-forensic-olive" />
+                AUTHENTIC
+              </span>
+              <span className="font-mono text-xs tabular-nums text-forensic-olive">96.0%</span>
             </div>
           </div>
 
           <div className="absolute left-1/2 top-1/2 z-20 hidden -translate-x-1/2 -translate-y-1/2 lg:flex">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold text-forensic-stone/70"
+              className="flex h-12 w-12 items-center justify-center rounded-full font-serif text-sm font-bold tracking-wider text-forensic-gold"
               style={{
-                background: '#1A1D20',
-                border: '1px solid rgba(168,162,154,0.2)',
-                boxShadow: '0 0 0 4px rgba(17,19,21,0.8)',
+                background: '#131517',
+                border: '1.5px solid rgba(184,138,68,0.5)',
+                boxShadow: '0 0 0 5px rgba(17,19,21,0.95), 0 0 20px rgba(184,138,68,0.15)',
               }}
             >
               VS
@@ -224,23 +287,37 @@ export function OverviewPage() {
           </div>
 
           <div className="relative h-[280px] overflow-hidden rounded-xl border-2 border-forensic-risk bg-graphite-950">
-            <img src="/demo-assets/fake.jpg" alt="AI 生成图像" className="h-full w-full object-cover" />
+            <img
+              src="/demo-assets/fake.jpg"
+              alt="AI 生成图像"
+              className="h-full w-full object-cover"
+            />
             {compareRegions.map((region) => (
-              <div key={region.label} className={`absolute rounded-lg border-2 border-dashed border-forensic-risk bg-forensic-risk/10 ${region.className}`}>
+              <div
+                key={region.label}
+                className={`absolute rounded-lg border-2 border-dashed border-forensic-risk bg-forensic-risk/10 ${region.className}`}
+              >
                 <span className="absolute -top-7 left-0 rounded-md border border-forensic-risk/30 bg-forensic-risk/15 px-2 py-1 text-xs text-forensic-risk">
                   {region.label}
                 </span>
               </div>
             ))}
-            <div className="absolute bottom-4 left-4 rounded-lg border border-forensic-risk/30 bg-forensic-risk/15 px-3 py-2 text-sm text-forensic-risk">
-              AI 生成 · 高风险 · 置信度 94%
+            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded border border-forensic-risk/60 bg-graphite-950/85 px-3 py-2 text-sm backdrop-blur">
+              <span className="inline-flex items-center gap-1 rounded-sm bg-forensic-risk/20 px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-forensic-risk">
+                <span className="h-1 w-1 rounded-full bg-forensic-risk" />
+                AI-GENERATED
+              </span>
+              <span className="font-mono text-xs tabular-nums text-forensic-risk">94.0% RISK</span>
             </div>
           </div>
         </div>
 
         <div className="mt-4 flex justify-center gap-2">
           {['边界异常', '纹理断裂', '反射不一致'].map((tag) => (
-            <span key={tag} className="rounded-full border border-forensic-gold/[0.08] bg-graphite-850 px-3 py-1 text-xs text-forensic-stone">
+            <span
+              key={tag}
+              className="rounded-full border border-forensic-gold/[0.08] bg-graphite-850 px-3 py-1 text-xs text-forensic-stone"
+            >
               {tag}
             </span>
           ))}
@@ -248,9 +325,26 @@ export function OverviewPage() {
       </section>
 
       <section className="mt-8 grid gap-4 lg:grid-cols-3">
-        <AnimatedStatCard numericTarget={947} suffix="%" label="AI生成检出率" note="模拟精度指标" values={[3, 5, 4, 7, 6, 8, 7, 9, 8, 10, 9, 11]} />
-        <StatCard value="< 2s" label="单图平均分析时间" note="前端演示时长" values={[8, 7, 7, 6, 5, 6, 4, 4, 3, 3, 2, 2]} />
-        <AnimatedStatCard numericTarget={6} suffix=" 类" label="证据类型覆盖" note="标注 · 语义 · 专家" values={[2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6]} />
+        <AnimatedStatCard
+          numericTarget={947}
+          suffix="%"
+          label="AI生成检出率"
+          note="模拟精度指标"
+          values={[3, 5, 4, 7, 6, 8, 7, 9, 8, 10, 9, 11]}
+        />
+        <StatCard
+          value="< 2s"
+          label="单图平均分析时间"
+          note="前端演示时长"
+          values={[8, 7, 7, 6, 5, 6, 4, 4, 3, 3, 2, 2]}
+        />
+        <AnimatedStatCard
+          numericTarget={6}
+          suffix=" 类"
+          label="证据类型覆盖"
+          note="标注 · 语义 · 专家"
+          values={[2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6]}
+        />
       </section>
 
       <SectionCard title="处理流程" className="mt-8">
@@ -260,7 +354,10 @@ export function OverviewPage() {
       <SectionCard title="最近任务" className="mt-8">
         <div className="grid gap-3 lg:grid-cols-3">
           {recentTasks.map((task) => (
-            <div key={task.id} className="rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4">
+            <div
+              key={task.id}
+              className="rounded-xl border border-forensic-gold/[0.08] bg-graphite-850 p-4"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-forensic-text">{task.label}</p>
@@ -269,7 +366,9 @@ export function OverviewPage() {
                   </p>
                   <p className="mt-1 text-xs text-forensic-stone">{STATUS_LABEL[task.status]}</p>
                 </div>
-                <StatusBadge tone={toneForRisk(task.riskLevel)}>{RISK_LABEL[task.riskLevel]}</StatusBadge>
+                <StatusBadge tone={toneForRisk(task.riskLevel)}>
+                  {RISK_LABEL[task.riskLevel]}
+                </StatusBadge>
               </div>
             </div>
           ))}

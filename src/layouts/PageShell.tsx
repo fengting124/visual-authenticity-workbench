@@ -11,19 +11,31 @@ type PageShellProps = {
 // Route wrapper keeps page transitions and heading rhythm consistent.
 export function PageShell({ eyebrow, title, description, children }: PageShellProps) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.22 }}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.22 }}
+      className="archive-grid relative min-h-full"
+    >
       <div className="mb-6 max-w-5xl">
-        <div className="flex items-center gap-2">
-          <motion.div
-            className="h-3 w-0.5 rounded-full bg-forensic-gold"
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          />
-          <p className="text-xs uppercase tracking-[0.2em] text-forensic-gold">{eyebrow}</p>
+        <div className="flex items-center gap-3">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-[1px] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em]"
+            style={{
+              background: '#C9A66B',
+              color: '#1C1E20',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            }}
+          >
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full"
+              style={{ background: '#1C1E20', opacity: 0.5 }}
+            />
+            FILE · {eyebrow}
+          </span>
         </div>
         <motion.h1
-          className="mt-2 text-3xl font-semibold tracking-normal text-forensic-text"
+          className="mt-3 font-serif text-3xl font-bold tracking-tight text-forensic-text"
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.25, delay: 0.05 }}
