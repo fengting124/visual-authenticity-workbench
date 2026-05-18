@@ -86,7 +86,7 @@ VeriLoop 由四层组成,自上而下贯通"造假 → 标注 → 鉴假 → 报
 "expert_blind_alert": false
 }
 }
-
+```
 视频版本只是在 L2 上加时间维度 `"time_range": [4.2, 7.8]`,其他字段
 完全一致。
 
