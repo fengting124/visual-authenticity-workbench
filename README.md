@@ -167,8 +167,8 @@ VeriLoop 由四层组成,自上而下贯通"造假 → 标注 → 鉴假 → 报
 
 **判决机制**: 门控选 K 个最相关专家 → 各自输出证据 → Shapley 归因 → 融合判决 + 可解释报告
 
-判决公式:P_final = Sigmoid(α · E_KG + β · E_LLM)
-G(x)_i = x · W_g,i + Softmax(x · W_noise,i)
+判决公式:$P_{final} = Sigmoid(α · E_{KG} + β · E_{LLM})$
+G(x)_i = x · W_g,i + Softmax(x · W_{noise},i)
 
 ---
 
@@ -218,6 +218,7 @@ LLM 推理: 此破损形态符合 inpainting 痕迹
 ---
 
 ## 七、前端目录结构src/
+
 ├── app/                # 应用入口与路由
 ├── layouts/            # 全局布局(侧边栏/顶栏/页壳)
 ├── pages/              # 8 个主路由页面
