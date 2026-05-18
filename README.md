@@ -1,66 +1,271 @@
-# VeriLoop
+VeriLoop · 视觉生成内容证据链标注与检测平台
 
-VeriLoop is a frontend prototype for a forensic evidence-loop platform. It demonstrates a closed workflow for synthetic media forensics: reverse-chain annotation, expert-group detection, evolution alerts, and structured evidence reporting.
+> 面向图片与视频的可解释取证闭环系统
 
-The interface uses a forensic archive style to distinguish the project from generic AI product demos.
+---
 
-## Scope
+## 一、项目立意
 
-Frontend-only prototype with mock data and local demo assets. No backend inference service is required.
+AI 生成内容的失控速度已经超过了检测系统的迭代速度。Nano Banana Pro、
+HunyuanImage 3.0、GPT Image 1.5 这类新模型每隔几个月就让现有检测器
+失效。问题的根源不是模型不够强,而是整个行业被困在"数据-训练-检测"
+的单向链条里 —— 新生成模型出现,等到出现一批人工标注的伪造数据,
+再训练一个新检测器,这个循环要 6-12 个月,而新生成模型半年就迭代
+两次。
 
-## Core Workflows
+**VeriLoop 提出取证闭环**:让标注端用生成模型的同款武器自己造样本、
+自己写证据链标签;检测端用语义思维链和异构混合专家做可解释判别;
+当检测端发现自己拿不准时,反向触发标注端生产新数据训练新专家。
+整个循环可以压缩到几小时。
 
-- Overview dashboard with VeriLoop forensic branding
-- Image annotation as a 5-stage reverse generation chain
-- Video annotation as a 5-stage reverse generation chain
-- Sample analysis workbench with expert fusion verdict
-- Evolution loop animation for expert blind-spot recovery
-- Report page with four-layer interactive evidence flow map
-- Archive-style evidence report preview
+> **核心定位**
+> 不止做了一个鉴伪工具,做了一套能自我进化的取证操作系统。
 
-## Reverse Generation Chains
+---
 
-Image annotation:
+## 二、系统总体架构
 
-1. Semantic inversion
-2. Tampering target selection
-3. Inpainting execution
-4. Four-layer label output
-5. Quality audit and evolution alert
+VeriLoop 由四层组成,自上而下贯通"造假 → 标注 → 鉴假 → 报告"
+全流程,自下而上通过"专家失能告警"反馈驱动演化。
 
-Video annotation:
+| 层级 | 名称 | 核心模块 | 关键技术 |
+|------|------|---------|---------|
+| L1 | 生成构造层 | 反向生成链路 · 多生成器对照 · 视频片段替换 | SAM + SD Inpainting + ASR + TTS + MoviePy |
+| L2 | 证据链标注层 | 四层标签自动产出 | 像素 mask + 区域 bbox + 语义三元组 + 链路元数据 |
+| L3 | 专家组检测层 | 语义思维链 + 异构混合专家 + Shapley 归因 | CLIP + Grounding DINO + ConceptNet + LLM + LoRA |
+| L4 | 可解释报告层 | 四维证据时空图 + 结构化档案 | @xyflow/react 节点图 + 取证档案样式 |
 
-1. Video parsing and ASR extraction
-2. Reverse text rewriting
-3. Multimodal segment synthesis
-4. Four-level label output
-5. Detector self-audit and difficulty archiving
+**贯穿四层的核心抽象**: 四维证据时空坐标(空间 × 时间 × 语义层级 × 置信度)
+**贯穿四层的反馈引擎**: 专家失能告警驱动的演化闭环
 
-## Tech Stack
+---
 
-Vite, React, TypeScript, Tailwind CSS, React Router, Framer Motion, ECharts, React Flow, lucide-react, pnpm.
+## 三、四大创新点
 
-## Commands
+### 创新点 1 · 四层证据链标注格式
 
-```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm lint
-pnpm preview
-```
+把标注从"框选 + 真假"升级为"提示词 + 区域 + 线索 + 链路"四位一体。
+任何视觉证据都遵循同一份 JSON 模式:
 
-## Routes
+```json{
+"evidence_id": "EV-IMG-001",
+"media_type": "image","L1_global": {
+"scene": "电商商品图 - 鞋类",
+"scene_confidence": 0.91,
+"inferred_prompt": "破损运动鞋,鞋面有裂痕",
+"prompt_visual_alignment": 0.82
+},"L2_local": [
+{
+"region_id": "R-01",
+"bbox": [120, 80, 360, 260],
+"mask": "polygon_rle_or_path",
+"entity": "破损区域",
+"anomaly_type": "boundary_inconsistency",
+"confidence": 0.87
+}
+],"L3_semantic": {
+"knowledge_graph_conflicts": [
+{
+"triplet": ["破损边缘", "融合于", "未磨损区域"],
+"E_KG": 0.78,
+"violation": "物理不连续"
+}
+],
+"llm_reasoning": {
+"E_LLM": 0.85,
+"explanation": "破损边缘与商品材质纹理不连续,符合生成式 inpainting 的典型痕迹"
+},
+"P_final": 0.91
+},"L4_chain": {
+"generator": "Stable Diffusion 3.5 Inpainting",
+"lora": null,
+"prompt": "torn shoe edge, photorealistic damage",
+"sampling_steps": 28,
+"cfg_scale": 7.5,
+"difficulty_tier": "Hard",
+"expert_blind_alert": false
+}
+}
 
-- `/`
-- `/samples`
-- `/analysis/sample`
-- `/annotation/image`
-- `/annotation/video`
-- `/report`
+视频版本只是在 L2 上加时间维度 `"time_range": [4.2, 7.8]`,其他字段
+完全一致。
 
-## Notes
+**这份四层标签是 VeriLoop 的核心资产**,它同时是:
 
-- Demo data lives under `src/features/*/data`.
-- Demo media assets live under `public/demo-assets`.
-- Generated verification screenshots live under `artifacts`.
+- 标注端的任务输出规范
+- 检测端的训练监督信号
+- 报告端的可视化数据源
+
+### 创新点 2 · 四维证据时空坐标统一抽象
+
+任何证据都表达为 `(空间坐标, 时间坐标, 语义层级, 置信度)`:
+
+- 图片证据 = (bbox/mask, null, L1-L4, score)
+- 视频证据 = (bbox/mask, [start,end], L1-L4, score)
+
+这意味着图像和视频在 VeriLoop 里**共享同一套报告渲染逻辑**:
+
+- 报告页绘制统一的"证据时空图",图像样本退化为单时间点,视频样本展开为时间轴
+- 同一套专家组(只是视频多一个时序专家和身份专家)
+- 同一套演化闭环
+
+> 我们不是做了图像版和视频版两个系统,我们做了一个**模态无关**的证据链系统,图像和视频只是它的两种实例化。
+
+### 创新点 3 · 专家失能告警驱动的演化闭环
+
+**触发条件**: 检测样本时,所有专家的 Shapley 贡献度均 < 0.2(没有专家强烈认领判决)。
+
+**触发后系统行为**:
+
+1. 样本被标记为 `expert_blind_alert: true`
+2. 推送到"疑难样本池",标注端用最细粒度模式重新标注
+3. 系统找出该样本可能的生成器来源
+4. 标注端用同款生成器**主动生成**一批相似样本(20-50 张),自动产生四层标签
+5. 这批样本训练一个新的 LoRA 专用专家(r=8,几小时内完成)
+6. 新专家加入异构 MoE 库,门控机制自动学会何时调用
+7. 同一批样本再次跑检测,如果新专家 Shapley > 0.3,告警解除
+
+这一步把"静态检测系统"升级为"可演化系统",是 VeriLoop 真正的护城河。
+
+### 创新点 4 · 反向生成链路标注
+
+传统图像伪造数据集靠"采集 + 人工标注",标注信息单薄。VeriLoop 用反向生成链路自动产出带四层标签的合成样本:真实图像 → BLIP-2 反推提示词 → SAM 分割实体 → Grounding DINO 标记可疑度
+→ SD Inpainting 局部重生成 → 四层标签自动产出 → 难度自检 → 归档
+
+**5 阶段标注流水线**:
+
+1. 语义反推(BLIP-2 + Grounding DINO + CLIP)
+2. 篡改目标选择(SAM 点击分割 + 价值评估)
+3. 篡改执行(SD/Hunyuan/Nano Banana Pro 多生成器对照)
+4. 四层标签输出(L1-L4)
+5. 质量自检(现有检测器评估难度 + 演化告警)
+
+这套机制让标注从"标注员的人力工作"变成"AI 自我生产的数据工厂"。
+
+---
+
+## 四、专家组配置
+
+| 专家 | 检测维度 | 输出证据 | 训练数据来源 |
+|------|---------|---------|------------|
+| 空域伪影专家 | 边界融合、几何畸变 | 区域热力图 + 几何冲突分数 | L2 区域级标签 |
+| 频域异常专家 | FFT 高频、压缩痕迹 | 频谱异常分数 | L2 区域级标签 |
+| 风格残留专家 | 生成器风格指纹 | 风格匹配度 | L4 链路级生成器标签 |
+| 语义常识专家 | KG 物理逻辑冲突 | KG 冲突能量 E_KG | L3 KG 标签 |
+| 提示词一致性专家 | 反推提示词与画面对齐 | 对齐分数 | L1 提示词标签 |
+| 时序一致性专家(视频) | 片段连续性、口型 | 时间轴风险区间 | 视频 L2 时间标签 |
+| 身份一致性专家(视频) | 人脸/姿态漂移 | 身份漂移图 | 视频专项标签 |
+
+**动态专用靶向专家(LoRA)**:
+
+- Stable Diffusion 3.5 专家
+- HunyuanImage 3.0 专家
+- Nano Banana Pro 专家
+- Imagen 3 专家
+- GPT Image 1.5 专家
+- (持续增加中,演化闭环驱动)
+
+**判决机制**: 门控选 K 个最相关专家 → 各自输出证据 → Shapley 归因 → 融合判决 + 可解释报告
+
+判决公式:P_final = Sigmoid(α · E_KG + β · E_LLM)
+G(x)_i = x · W_g,i + Softmax(x · W_noise,i)
+
+---
+
+## 五、三个标杆演示场景
+
+### 场景 1 · 电商虚假破损图(图像端核心)上传一张破损运动鞋图
+→ [L1] 场景识别: 电商商品图-鞋类 / 反推提示词: "torn shoe edge"
+→ [L2] Grounding DINO 定位破损区域 / SAM 输出精确 mask
+→ [L3] 知识图谱冲突: <破损边缘, 融合于, 未磨损区域>
+LLM 推理: 此破损形态符合 inpainting 痕迹
+激活专家: 空域 32% + 风格 28% + 频域 20% + ...
+→ [L4] 判决: AI 生成 · 置信度 91%
+适用场景: 电商风控 · 仅退款防伪
+
+### 场景 2 · 视频片段口型替换(视频端核心)上传 30 秒发言视频
+→ [L2] 时序专家扫描: 4.2s-7.8s 片段口型异常
+身份专家: 同片段下颌轮廓漂移
+→ [L3] 语义专家: 该片段语音内容与前后逻辑断裂
+→ [L4] 时间轴标注高风险区间 / 关键帧 KF-01~KF-03 突出
+适用场景: 司法证据核查 · 新闻视频核实
+
+### 场景 3 · 专家失能与演化闭环(技术亮点核心)上传一张新型 Nano Banana Pro 生成图
+→ [L3] 所有专家 Shapley < 0.2,系统无法判定
+→ 触发演化闭环:
+标注端接收疑难样本 → 用 Nano Banana Pro 生成 30 张相似样本
+→ 自动产生四层标签 → LoRA r=8 训练 (约 4 小时)
+→ 新专家热插拔进 MoE 库
+→ 重新检测原样本: Nano Banana Pro 专家 Shapley = 0.41,主导判决
+告警解除 · 系统能力升级完成
+
+---
+
+## 六、技术栈
+
+| 类别 | 技术 |
+|------|------|
+| 前端框架 | Vite 6 · React 18 · TypeScript strict |
+| 样式 | Tailwind 3 · 取证档案风设计语言 |
+| 动效 | Framer Motion 11 |
+| 路由 | React Router 7 |
+| 图表 | ECharts · Recharts |
+| 节点图 | @xyflow/react |
+| 字体 | Inter · JetBrains Mono · Caveat(手写批注) |
+| 图标 | lucide-react |
+| 包管理 | pnpm 9 · Node 20 |
+
+---
+
+## 七、前端目录结构src/
+├── app/                # 应用入口与路由
+├── layouts/            # 全局布局(侧边栏/顶栏/页壳)
+├── pages/              # 8 个主路由页面
+├── features/           # 业务模块
+│   ├── samples/        # 样本库与导入
+│   ├── annotation/     # 五阶段标注流水线
+│   ├── analysis/       # 语义链 + 专家组 + 融合判决
+│   └── report/         # 四层证据 + 时空图报告
+├── shared/             # 通用组件、工具、类型
+└── styles/             # 全局样式 + 设计 token
+
+---
+
+## 八、设计语言:取证档案风
+
+VeriLoop 抛弃常见 AI 产品的"赛博渐变"风格,采用刑侦取证档案风:
+
+- **配色**: graphite 暗灰底 + forensic gold 金色取证色
+- **字体**: 等宽数字(JetBrains Mono)+ 衬线档案标题 + 手写批注(Caveat)
+- **标识**: 物证编号(EXHIBIT-A / EV-IMG-001)、印章戳记(CLASSIFIED / VERIFIED)
+- **质感**: 网格纸纹理 + 装订孔 + 图钉/回形针 + 档案夹色标条
+- **意图**: 让评委一眼判断"这不是 demo,这是真在跑的取证系统"
+
+目标用户不是产品经理,是**检察官、风控分析师、合规审计员**——取证工作的本质需要这种语言。
+
+---
+
+## 九、版本与开发
+
+| 命令 | 作用 |
+|------|------|
+| `pnpm install` | 安装依赖 |
+| `pnpm dev` | 启动开发服务器 |
+| `pnpm build` | 生产构建 |
+| `pnpm lint` | 代码检查 |
+
+需求: Node 20+ / pnpm 9+
+
+---
+
+## 十、政策与战略对齐
+
+VeriLoop 直接响应:
+
+- 习近平总书记关于"推动人工智能朝着有益、安全、公平方向健康有序发展"的指示
+- 《人工智能全球治理行动计划》《人工智能全球治理上海宣言》
+- 《国务院关于深入实施"人工智能+"行动的意见》对防范黑箱决策、算法歧视的要求
+- 《人工智能安全治理框架(2.0)》
+- 《麻省理工科技评论》2026 年十大突破性技术之一: 可解释性
+
+VeriLoop 在金融反欺诈、司法证据鉴别、互联网内容合规审核等高可信场景具有直接落地价值。
